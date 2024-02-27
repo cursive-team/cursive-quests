@@ -13,7 +13,6 @@ import {
   startAuthentication,
   startRegistration,
 } from "@simplewebauthn/browser";
-import { webauthnRegistrationOptions } from "@/shared/constants";
 import { Input } from "@/components/Input";
 
 enum DisplayState {
@@ -24,6 +23,17 @@ enum DisplayState {
   INPUT_PASSWORD,
   CREATING_ACCOUNT,
 }
+
+export const webauthnRegistrationOptions = {
+  rpName: "cursive-quests",
+  rpID: window.location.origin,
+  userID: "user",
+  userName: "username",
+};
+
+export const webauthnAuthenticationOptions = {
+  rpID: window.location.origin,
+};
 
 export default function Register() {
   const router = useRouter();
