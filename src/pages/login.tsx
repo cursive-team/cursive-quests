@@ -131,3 +131,7 @@ export default function Login() {
     </FormStepLayout>
   );
 }
+
+Login.getInitialProps = () => {
+  return { fullPage: true };
+};

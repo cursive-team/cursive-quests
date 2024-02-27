@@ -18,13 +18,6 @@ import { Input } from "@/components/Input";
 import Link from "next/link";
 import { FormStepLayout } from "@/layouts/FormStepLayout";
 import { toast } from "sonner";
-import {
-  displayNameRegex,
-  farcasterUsernameRegex,
-  handleNicknameChange,
-  telegramUsernameRegex,
-  twitterUsernameRegex,
-} from "@/lib/shared/utils";
 import { Spinner } from "@/components/Spinner";
 import { Radio } from "@/components/Radio";
 import { Checkbox } from "@/components/Checkbox";
@@ -44,19 +37,26 @@ import {
 import { sha256 } from "js-sha256";
 
 enum DisplayState {
+  DISPLAY,
   INPUT_EMAIL,
-  INPUT_CODE,
-  INPUT_SOCIAL,
-  CHOOSE_CUSTODY,
-  INPUT_PASSWORD,
-  CREATING_ACCOUNT,
 }
 
 export default function Register() {
   const router = useRouter();
   const [displayState, setDisplayState] = useState<DisplayState>(
-    DisplayState.INPUT_EMAIL
+    DisplayState.DISPLAY
   );
+  const [email, setEmail] = useState<string>();
+  const [password, setPassword] = useState<string>();
+  const [confirmPassword, setConfirmPassword] = useState<string>();
+
+  const handleCreateWithEmail = () => {
+    setDisplayState(DisplayState.INPUT_EMAIL);
+  };
+
+  const handleCreateWithPasskey = () => {
+    setDisplayState(DisplayState.DISPLAY);
+  };
 
   const handleSubmit = async (e: FormEvent<Element>) => {
     e.preventDefault();
@@ -85,6 +85,22 @@ export default function Register() {
       toast.error("Authentication failed! Please try again.");
       return;
     }
+  };
+
+  const handleSubmitWithEmail = async (e: FormEvent<Element>) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      toast.error("Please enter an email address and password.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
+    await createAccount(email, password, undefined);
   };
 
   const createAccount = async (
@@ -213,20 +229,68 @@ export default function Register() {
     router.push("/");
   };
 
-  return (
-    <FormStepLayout
-      title="Welcome to Cursive Quests"
-      description={new Date().toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-      })}
-      className="pt-4"
-      onSubmit={handleSubmit}
-    >
-      <Button type="submit">Continue</Button>
-      <Link href="/login" className="link text-center">
-        I already have an account
-      </Link>
-    </FormStepLayout>
-  );
+  if (displayState === DisplayState.DISPLAY) {
+    return (
+      <FormStepLayout
+        title="Welcome to Cursive Quests"
+        description={new Date().toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+        })}
+        className="pt-4"
+        onSubmit={handleSubmit}
+      >
+        <Button type="submit">Continue</Button>
+        <Button onClick={handleCreateWithEmail}>
+          Create account with email and password
+        </Button>
+        <Link href="/login" className="link text-center">
+          I already have an account
+        </Link>
+      </FormStepLayout>
+    );
+  } else if (displayState === DisplayState.INPUT_EMAIL) {
+    return (
+      <FormStepLayout
+        title="Welcome to Cursive Quests"
+        description={new Date().toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+        })}
+        className="pt-4"
+        onSubmit={handleSubmitWithEmail}
+      >
+        <Input
+          type="email"
+          id="email"
+          label="Email"
+          placeholder="bob.smith@gmail.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <Input
+          type="password"
+          id="password"
+          label="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <Input
+          type="password"
+          id="confirmPassword"
+          label="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
+        <Button type="submit">Create Account</Button>
+        <Button onClick={handleCreateWithPasskey}>
+          Create account with passkey
+        </Button>
+      </FormStepLayout>
+    );
+  }
 }
+
+Register.getInitialProps = () => {
+  return { fullPage: true };
+};
