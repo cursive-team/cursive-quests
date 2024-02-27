@@ -93,7 +93,9 @@ export default function Register() {
       await createAccount(username, id, authPublicKey);
     } catch (error) {
       console.error("Error creating account: ", error);
-      toast.error("Authentication failed! Please try again.");
+      toast.error(
+        "Authentication failed! Please try again or use email and password."
+      );
       setLoading(false);
       return;
     }
