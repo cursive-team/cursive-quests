@@ -141,18 +141,22 @@ export default function Login() {
     // Populate localStorage with auth and backup data to load messages
     saveAuthToken(authToken);
     loadBackup(decryptedBackupData);
+    console.log("h", authToken, decryptedBackupData);
 
     try {
       await loadMessages({ forceRefresh: true });
+      console.log("i");
     } catch (error) {
       deleteAccountFromLocalStorage();
       toast.error("Error logging in. Please try again.");
       setLoading(false);
       return;
     }
+    console.log("j");
 
     setLoading(false);
     router.push("/");
+    console.log("k");
   };
 
   if (displayState === DisplayState.DISPLAY) {
