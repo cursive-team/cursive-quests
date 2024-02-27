@@ -241,9 +241,9 @@ export default function Register() {
         onSubmit={handleSubmit}
       >
         <Button type="submit">Continue</Button>
-        <Button onClick={handleCreateWithEmail}>
-          Create account with email and password
-        </Button>
+        <span className="text-center text-sm" onClick={handleCreateWithEmail}>
+          <u>Create account with email and password</u>
+        </span>
         <Link href="/login" className="link text-center">
           I already have an account
         </Link>
@@ -285,9 +285,9 @@ export default function Register() {
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
         <Button type="submit">Create Account</Button>
-        <Button onClick={handleCreateWithPasskey}>
-          Create account with passkey
-        </Button>
+        <span className="text-center text-sm" onClick={handleCreateWithPasskey}>
+          <u>Create account with passkey</u>
+        </span>
       </FormStepLayout>
     );
   }

@@ -147,9 +147,12 @@ export default function Login() {
         onSubmit={handleSubmit}
       >
         <Button type="submit">Login</Button>
-        <Button onClick={() => setDisplayState(DisplayState.INPUT_EMAIL)}>
-          Login with email and password
-        </Button>
+        <span
+          className="text-center text-sm"
+          onClick={() => setDisplayState(DisplayState.INPUT_EMAIL)}
+        >
+          <u>Login with email and password</u>
+        </span>
         <Link href="/register" className="link text-center">
           I do not have an account
         </Link>
@@ -183,9 +186,12 @@ export default function Login() {
           onChange={(e) => setPassword(e.target.value)}
         />
         <Button type="submit">Login</Button>
-        <Button onClick={() => setDisplayState(DisplayState.DISPLAY)}>
-          Login with passkey
-        </Button>
+        <span
+          className="text-center text-sm"
+          onClick={() => setDisplayState(DisplayState.DISPLAY)}
+        >
+          <u>Login with passkey</u>
+        </span>
         <Link href="/register" className="link text-center">
           I do not have an account
         </Link>
