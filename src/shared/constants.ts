@@ -17,3 +17,14 @@ export const StoreSortMapping: Record<StoreSortMappingType, string> = {
   UNLOCKED: "Unlocked",
   REDEEMED: "Redeemed",
 };
+
+export const WebauthnRegistrationOptions = {
+  rpName: "cursive-quests",
+  rpID: "cursive",
+  userID: "user",
+  userName: "username",
+};
+
+export const WebauthnAuthenticationOptions = {
+  rpID: "cursive",
+};
