@@ -93,14 +93,26 @@ const AppHeaderContent = ({
           <ContentWrapper>
             <Title>FAQ</Title>
             <div className="flex flex-col gap-2">
-              <Subtitle>
-                Lorem ipsum dolor sit amet, consectetur adipiscing?
-              </Subtitle>
+              <Subtitle>What is this?</Subtitle>
               <Description>
-                Curabitur ultrices faucibus urna, a gravida mi dictum sed.
-                Nullam dictum quam id odio scelerisque ultrices. Nulla rhoncus
-                tortor nunc, a mollis justo varius sed. Vestibulum turpis
-                ligula, suscipit vel rhoncus ut.
+                Cursive Quests is an experience where you tap NFC chips in order
+                to collect digital signatures. Each signature represents a
+                person you met, place you visited, or thing you did. Quests
+                require you to collect a certain number of signatures from
+                specific people or locations, and completing quests unlocks
+                unique rewards!
+              </Description>
+              <Subtitle>Who built this?</Subtitle>
+              <Description>
+                This app was built by the{" "}
+                <u>
+                  <a href="cursive.team">Cursive team</a>
+                </u>
+                . Cursive is a human-centered cryptography lab building
+                applications of digital signatures and advanced cryptography. We
+                are interested in collaborating with other teams and individuals
+                who want to build cryptography centered experiences. If you are
+                interested, please reach out from our website!
               </Description>
             </div>
           </ContentWrapper>
@@ -108,14 +120,24 @@ const AppHeaderContent = ({
             <Title>Project Links</Title>
             <div className="flex flex-col gap-2">
               <Subtitle>
-                GitHub:{" "}
                 <u>
                   <a
                     href="https://github.com/cursive-team/cursive-quests"
                     target="_blank"
                     rel="noreferrer noopener"
                   >
-                    Github Repository
+                    Check out the code on Github
+                  </a>
+                </u>
+              </Subtitle>
+              <Subtitle>
+                <u>
+                  <a
+                    href="https://cursive.team"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    Learn more about Cursive
                   </a>
                 </u>
               </Subtitle>
@@ -226,7 +248,7 @@ interface AppHeaderProps {
 const AppHeader = ({ isMenuOpen, setIsMenuOpen }: AppHeaderProps) => {
   const handleSignout = () => {
     deleteAccountFromLocalStorage();
-    window.location.href = "/";
+    window.location.href = "/login";
   };
 
   return (

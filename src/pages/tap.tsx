@@ -30,6 +30,10 @@ export default function Tap() {
   const [pendingLocationTapResponse, setPendingLocationTapResponse] =
     useState<LocationTapResponse>();
 
+  const routerSignature = router.query.sig as string | undefined;
+  const routerMessage = router.query.msg as string | undefined;
+  const routerPublicKey = router.query.pk as string | undefined;
+
   // Save the newly tapped person to local storage and redirect to their profile
   const processPersonTap = useCallback(
     async (person: PersonTapResponse) => {
@@ -137,7 +141,11 @@ export default function Tap() {
     const handleLocationTap = async (location: LocationTapResponse) => {
       const authToken = getAuthToken();
       if (!authToken || authToken.expiresAt < new Date()) {
-        setPendingLocationTapResponse(location);
+        // setPendingLocationTapResponse(location);
+        const { signature, signatureMessage, signaturePublicKey } = location;
+        router.push(
+          `/register?sig=${signature}&msg=${signatureMessage}&pk=${signaturePublicKey}`
+        );
       } else {
         processLocationTap(location);
       }
@@ -191,31 +199,41 @@ export default function Tap() {
         });
     } else {
       // ----- HANDLE CARD GENERATED SIGNATURE TAP -----
-      if (!location.hash) {
-        toast.error("Unable to process tap.");
-        router.push("/");
-        return;
-      }
+      // if (!location.hash) {
+      //   toast.error("Unable to process tap.");
+      //   router.push("/");
+      //   return;
+      // }
 
-      const urlParams = new URLSearchParams(location.hash.slice(1));
-      const rawLocationSignature = getHaLoArgs(urlParams);
-      if (!rawLocationSignature) {
-        toast.error("Unable to process tap.");
-        router.push("/");
-        return;
-      }
-      const {
-        signaturePublicKey,
-        signatureMessage,
-        signature: rawHaloSig,
-      } = rawLocationSignature;
-      let signature: string = rawHaloSig;
-      try {
-        signature = fixBJJSig(signature);
-      } catch (error) {
-        toast.error("Unable to process tap.");
-        router.push("/");
-        return;
+      let signaturePublicKey: string;
+      let signatureMessage: string;
+      let signature: string;
+      if (routerSignature && routerMessage && routerPublicKey) {
+        signaturePublicKey = routerPublicKey;
+        signatureMessage = routerMessage;
+        signature = routerSignature;
+      } else {
+        const urlParams = new URLSearchParams(location.hash.slice(1));
+        const rawLocationSignature = getHaLoArgs(urlParams);
+        if (!rawLocationSignature) {
+          toast.error("Unable to process tap.");
+          router.push("/");
+          return;
+        }
+        const {
+          signaturePublicKey: haloSigPk,
+          signatureMessage: haloSigMsg,
+          signature: rawHaloSig,
+        } = rawLocationSignature;
+        try {
+          signaturePublicKey = haloSigPk;
+          signatureMessage = haloSigMsg;
+          signature = fixBJJSig(rawHaloSig);
+        } catch (error) {
+          toast.error("Unable to process tap.");
+          router.push("/");
+          return;
+        }
       }
 
       fetch(`/api/tap/sig_card?signaturePublicKey=${signaturePublicKey}`, {
@@ -255,7 +273,14 @@ export default function Tap() {
           toast.error("Error! Please refresh and try again.");
         });
     }
-  }, [router, processPersonTap, processLocationTap]);
+  }, [
+    router,
+    processPersonTap,
+    processLocationTap,
+    routerMessage,
+    routerPublicKey,
+    routerSignature,
+  ]);
 
   if (pendingPersonTapResponse) {
     return (

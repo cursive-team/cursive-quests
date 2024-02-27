@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/router";
 import { v4 as uuidv4 } from "uuid";
 import { generateEncryptionKeyPair } from "@/lib/client/encryption";
@@ -18,252 +18,129 @@ import { Input } from "@/components/Input";
 import Link from "next/link";
 import { FormStepLayout } from "@/layouts/FormStepLayout";
 import { toast } from "sonner";
-import {
-  displayNameRegex,
-  farcasterUsernameRegex,
-  handleNicknameChange,
-  telegramUsernameRegex,
-  twitterUsernameRegex,
-} from "@/lib/shared/utils";
 import { Spinner } from "@/components/Spinner";
 import { Radio } from "@/components/Radio";
 import { Checkbox } from "@/components/Checkbox";
 import { loadMessages } from "@/lib/client/jubSignalClient";
 import { encryptRegisteredMessage } from "@/lib/client/jubSignal/registered";
 import { AppBackHeader } from "@/components/AppHeader";
+import {
+  generateAuthenticationOptions,
+  generateRegistrationOptions,
+  GenerateRegistrationOptionsOpts as RegistrationOptions,
+  GenerateAuthenticationOptionsOpts as AuthenticationOptions,
+} from "@simplewebauthn/server";
+import {
+  startAuthentication,
+  startRegistration,
+} from "@simplewebauthn/browser";
+import { sha256 } from "js-sha256";
+import { usePlausible } from "next-plausible";
 
 enum DisplayState {
+  DISPLAY,
   INPUT_EMAIL,
-  INPUT_CODE,
-  INPUT_SOCIAL,
-  CHOOSE_CUSTODY,
-  INPUT_PASSWORD,
-  CREATING_ACCOUNT,
 }
 
 export default function Register() {
   const router = useRouter();
-
   const [displayState, setDisplayState] = useState<DisplayState>(
-    DisplayState.INPUT_EMAIL
+    DisplayState.DISPLAY
   );
-  const [iykRef, setIykRef] = useState<string>("");
-  const [mockRef, setMockRef] = useState<string>();
-  const [email, setEmail] = useState<string>("");
-  const [code, setCode] = useState<string>("");
-  const [displayName, setDisplayName] = useState<string>("");
-  const [twitterUsername, setTwitterUsername] = useState<string>("@");
-  const [telegramUsername, setTelegramUsername] = useState<string>("@");
-  const [farcasterUsername, setFarcasterUsername] = useState<string>("@");
-  const [bio, setBio] = useState<string>();
-  const [wantsServerCustody, setWantsServerCustody] = useState<boolean>(false);
-  const [allowsAnalytics, setAllowAnalytics] = useState<boolean>(false);
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>();
+  const [password, setPassword] = useState<string>();
+  const [confirmPassword, setConfirmPassword] = useState<string>();
+  const [loading, setLoading] = useState(false);
+  const plausible = usePlausible();
 
-  useEffect(() => {
-    if (router.query.iykRef) {
-      setIykRef(router.query.iykRef as string);
-    }
-    if (router.query.mockRef) {
-      setMockRef(router.query.mockRef as string);
-    }
-  }, [router.query.iykRef, router.query.mockRef]);
+  const routerSignature = router.query.sig as string | undefined;
+  const routerMessage = router.query.msg as string | undefined;
+  const routerPublicKey = router.query.pk as string | undefined;
 
-  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // let's trim and lowercase email, with iPhone sometime it start with a capital letter or add a space at the end
-    const emailCleaned = event.target.value.trim().toLowerCase();
-    setEmail(emailCleaned);
+  const handleCreateWithEmail = () => {
+    plausible("switchToEmailRegister");
+    setDisplayState(DisplayState.INPUT_EMAIL);
   };
 
-  const handleCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCode(event.target.value);
+  const handleCreateWithPasskey = () => {
+    plausible("switchToPasskeyRegister");
+    setDisplayState(DisplayState.DISPLAY);
   };
 
-  const handleDisplayNameChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const displayNameCleaned = event.target.value.trim(); // remove trailing spaces
-    setDisplayName(displayNameCleaned);
-  };
-
-  const handleTwitterUsernameChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setTwitterUsername(handleNicknameChange(event));
-  };
-
-  const handleTelegramUsernameChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setTelegramUsername(handleNicknameChange(event));
-  };
-
-  const handleFarcasterUsernameChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setFarcasterUsername(handleNicknameChange(event));
-  };
-
-  const handleBioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setBio(event.target.value);
-  };
-
-  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(event.target.value);
-  };
-
-  const handleConfirmPasswordChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setConfirmPassword(event.target.value);
-  };
-
-  const handleEmailSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (!iykRef) {
-      toast.error("Please tap your card to link it to your account.");
-      return;
-    }
+  const handleSubmit = async (e: FormEvent<Element>) => {
+    e.preventDefault();
 
     setLoading(true);
-    fetch("/api/register/get_code", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, iykRef, mockRef }),
-    })
-      .then((response) => {
-        if (response.ok) {
-          setDisplayState(DisplayState.INPUT_CODE);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data.error) {
-          throw new Error(data.error);
-        }
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        toast.error(error.message);
-        setLoading(false);
-      });
-  };
 
-  const handleCodeSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    setLoading(true);
-    fetch("/api/register/verify_code", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, code }),
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        if (data.error) {
-          throw new Error(data.error);
-        }
+    const registrationOptions = await generateRegistrationOptions({
+      rpName: "cursive-quests",
+      rpID: window.location.hostname,
+      userID: "cursive",
+      userName: "Cursive Quests",
+      attestationType: "none",
+    });
 
-        const verifyCodeResponse =
-          verifySigninCodeResponseSchema.validateSync(data);
-        if (verifyCodeResponse.success) {
-          setDisplayState(DisplayState.INPUT_SOCIAL);
-        } else {
-          const errorReason = verifyCodeResponse.reason;
-          if (errorReason) {
-            throw new Error(errorReason);
-          }
-        }
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error: ", error);
-        toast.error("Invalid email code");
-        setLoading(false);
-      });
-  };
-
-  const handleSocialSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!displayNameRegex.test(displayName)) {
-      toast.error(
-        "Display name must consist of letters and numbers only, < 20 chars."
+    try {
+      const { id, response: authResponse } = await startRegistration(
+        registrationOptions
       );
+      const authPublicKey = authResponse.publicKey;
+      if (!authPublicKey) {
+        throw new Error("No public key returned from authenticator");
+      }
+
+      const username = sha256(id);
+      await createAccount(username, id, authPublicKey);
+    } catch (error) {
+      console.error("Error creating account: ", error);
+      toast.error("Authentication failed! Please try again.");
+      setLoading(false);
       return;
-    }
-
-    if (
-      twitterUsername !== "@" &&
-      !twitterUsernameRegex.test(twitterUsername)
-    ) {
-      toast.error("Invalid Twitter username.");
-      return;
-    }
-
-    if (
-      telegramUsername !== "@" &&
-      !telegramUsernameRegex.test(telegramUsername)
-    ) {
-      toast.error("Invalid Telegram username.");
-      return;
-    }
-
-    if (
-      farcasterUsername !== "@" &&
-      !farcasterUsernameRegex.test(farcasterUsername)
-    ) {
-      toast.error("Invalid Farcaster username.");
-      return;
-    }
-
-    if (bio && bio.length > 200) {
-      toast.error("Bio must be less than 200 characters.");
-      return;
-    }
-
-    setDisplayState(DisplayState.CHOOSE_CUSTODY);
-  };
-
-  const handleCustodySubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (wantsServerCustody) {
-      await handleCreateAccount();
-    } else {
-      setDisplayState(DisplayState.INPUT_PASSWORD);
     }
   };
 
-  const handleCreateAccount = async () => {
-    setDisplayState(DisplayState.CREATING_ACCOUNT);
+  const handleSubmitWithEmail = async (e: FormEvent<Element>) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      toast.error("Please enter an email address and password.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+
+    await createAccount(email, password, undefined);
+  };
+
+  const createAccount = async (
+    email: string,
+    password: string,
+    authPublicKey: string | undefined
+  ) => {
+    setLoading(true);
 
     const { privateKey, publicKey } = await generateEncryptionKeyPair();
     const { signingKey, verifyingKey } = generateSignatureKeyPair();
 
     let passwordSalt, passwordHash;
-    if (!wantsServerCustody) {
-      passwordSalt = generateSalt();
-      passwordHash = await hashPassword(password, passwordSalt);
-    }
+    passwordSalt = generateSalt();
+    passwordHash = await hashPassword(password, passwordSalt);
 
+    const displayName = email;
+    const wantsServerCustody = false;
+    const allowsAnalytics = false;
     const response = await fetch("/api/register/create_account", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        iykRef,
-        mockRef,
         email,
-        code,
         displayName,
         wantsServerCustody,
         allowsAnalytics,
@@ -271,13 +148,14 @@ export default function Register() {
         signaturePublicKey: verifyingKey,
         passwordSalt,
         passwordHash,
+        authPublicKey,
       }),
     });
 
     if (!response.ok) {
       console.error(`HTTP error! status: ${response.status}`);
       toast.error("Error creating account! Please try again.");
-      setDisplayState(DisplayState.INPUT_EMAIL);
+      setLoading(false);
       return;
     }
 
@@ -285,7 +163,7 @@ export default function Register() {
     if (!data.value || !data.expiresAt) {
       console.error("Account created, but no auth token returned.");
       toast.error("Account created, but error logging in! Please try again.");
-      setDisplayState(DisplayState.INPUT_EMAIL);
+      setLoading(false);
       return;
     }
 
@@ -302,13 +180,6 @@ export default function Register() {
       signaturePublicKey: verifyingKey,
       wantsServerCustody,
       allowsAnalytics,
-      twitterUsername:
-        twitterUsername === "@" ? undefined : twitterUsername.slice(1),
-      telegramUsername:
-        telegramUsername === "@" ? undefined : telegramUsername.slice(1),
-      farcasterUsername:
-        farcasterUsername === "@" ? undefined : farcasterUsername.slice(1),
-      bio: bio === "" ? undefined : bio,
     });
     saveAuthToken({
       value: data.value,
@@ -319,6 +190,7 @@ export default function Register() {
     if (!backupData) {
       console.error("Error creating backup!");
       toast.error("Error creating backup! Please try again.");
+      setLoading(false);
       return;
     }
 
@@ -342,6 +214,7 @@ export default function Register() {
     if (!backupResponse.ok) {
       console.error(`HTTP error! status: ${backupResponse.status}`);
       toast.error("Error storing backup! Please try again.");
+      setLoading(false);
       return;
     }
 
@@ -369,248 +242,94 @@ export default function Register() {
     } catch (error) {
       console.error("Error sending registration tap to server: ", error);
       toast.error("An error occured while registering.");
+      setLoading(false);
       return;
     }
 
     toast.success("Account created and backed up!");
-    router.push("/");
-  };
-
-  const handleCreateSelfCustodyAccount = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!password || password !== confirmPassword) {
-      toast.error("Passwords do not match!");
-      return;
+    setLoading(false);
+    if (routerSignature && routerMessage && routerPublicKey) {
+      router.push(
+        `/tap?sig=${routerSignature}&msg=${routerMessage}&pk=${routerPublicKey}`
+      );
+    } else {
+      router.push("/");
     }
-
-    await handleCreateAccount();
   };
 
-  return (
-    <>
-      {displayState === DisplayState.INPUT_EMAIL && (
-        <FormStepLayout
-          title="Welcome to Cursive Quests"
-          description={new Date().toLocaleDateString("en-US", {
-            month: "long",
-            day: "numeric",
-          })}
-          className="pt-4"
-          onSubmit={handleEmailSubmit}
-        >
-          <Input
-            label="Email"
-            placeholder="Your email"
-            type="email"
-            name="email"
-            value={email}
-            onChange={handleEmailChange}
-            required
-          />
-          <Button loading={loading} type="submit">
-            Continue
-          </Button>
-          <Link href="/login" className="link text-center">
-            I already have an account
-          </Link>
-        </FormStepLayout>
-      )}
-      {displayState === DisplayState.INPUT_CODE && (
-        <div className="flex flex-col grow">
-          <AppBackHeader
-            label="Email"
-            onBackClick={() => setDisplayState(DisplayState.INPUT_EMAIL)}
-          />
-          <FormStepLayout
-            title={`We've just sent you a six digit code to ${email}`}
-            description={new Date().toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-            })}
-            className="pt-4 grow"
-            onSubmit={handleCodeSubmit}
-          >
-            <Input
-              type="text"
-              name="code"
-              value={code}
-              label="6-digit code"
-              placeholder="Confirm your 6-digit code"
-              onChange={handleCodeChange}
-              required
-            />
-            <Button loading={loading} type="submit">
-              Continue
-            </Button>
-          </FormStepLayout>
-        </div>
-      )}
-      {displayState === DisplayState.INPUT_SOCIAL && (
-        <div className="flex flex-col grow">
-          <AppBackHeader
-            label="Email"
-            // no need to get back to code, redirect to email input
-            onBackClick={() => setDisplayState(DisplayState.INPUT_EMAIL)}
-          />
-          <FormStepLayout
-            title="Social settings"
-            description="1/2"
-            onSubmit={handleSocialSubmit}
-            className="pt-4"
-            header={
-              <div className="flex flex-col gap-4">
-                <span className="text-sm text-gray-11 font-light">
-                  You can choose which social channels to share each time you
-                  tap someone else. You can change these at any time in the app.
-                </span>
-                <Input
-                  type="text"
-                  label="Display name"
-                  placeholder="Choose a display name"
-                  value={displayName}
-                  onChange={handleDisplayNameChange}
-                  required
-                />
-                <Input
-                  type="text"
-                  name="twitterUsername"
-                  label="X (Optional)"
-                  placeholder="twitter.com/username"
-                  value={twitterUsername}
-                  onChange={handleTwitterUsernameChange}
-                />
-                <Input
-                  type="text"
-                  name="telegramUsername"
-                  label="Telegram (Optional)"
-                  placeholder="Telegram username"
-                  value={telegramUsername}
-                  onChange={handleTelegramUsernameChange}
-                />
-                <Input
-                  type="text"
-                  name="farcasterUsername"
-                  label="Farcaster (Optional)"
-                  placeholder="Farcaster username"
-                  value={farcasterUsername}
-                  onChange={handleFarcasterUsernameChange}
-                />
-                <Input
-                  type="text"
-                  name="bio"
-                  label="Bio (Optional)"
-                  placeholder="Notes about yourself"
-                  value={bio}
-                  onChange={handleBioChange}
-                />
-              </div>
-            }
-          >
-            <Button type="submit">Next: Data Custody</Button>
-          </FormStepLayout>
-        </div>
-      )}
-      {displayState === DisplayState.CHOOSE_CUSTODY && (
-        <div className="flex flex-col grow">
-          <AppBackHeader
-            label="Social settings"
-            onBackClick={() => setDisplayState(DisplayState.INPUT_SOCIAL)}
-          />
-          <FormStepLayout
-            onSubmit={handleCustodySubmit}
-            description="2/2"
-            title="Ownership & analytics consent"
-            className="pt-4"
-            header={
-              <fieldset className="flex flex-col gap-6">
-                <span className="text-gray-11 text-sm">
-                  {
-                    "We've integrated ZK tech into this experience to enable full data ownership and portability. Choose if you want to enable it."
-                  }
-                </span>
-                <Radio
-                  id="selfCustody"
-                  name="custody"
-                  value="self"
-                  label="Self custody"
-                  description="Your Cursive Quests interaction data is private to you, encrypted by a master password set on the next page. ZK proofs are used to prove quest completion."
-                  checked={!wantsServerCustody}
-                  onChange={() => setWantsServerCustody(false)}
-                />
-                <Radio
-                  id="serverCustody"
-                  type="radio"
-                  name="custody"
-                  value="server"
-                  label="Server custody"
-                  description="Your Cursive Quests interaction data is stored in plaintext, and may be shared with third parties."
-                  checked={wantsServerCustody}
-                  onChange={() => setWantsServerCustody(true)}
-                />
-                <span className="text-gray-11 text-sm">
-                  If we have your consent, Cursive will use client-side
-                  performance analytics to determine how to improve the app.
-                  This will never include any identifying information.
-                </span>
-                <Checkbox
-                  id="allowAnalytics"
-                  label="I consent to sharing analytics data"
-                  checked={allowsAnalytics}
-                  onChange={setAllowAnalytics}
-                  disabled={false}
-                />
-              </fieldset>
-            }
-          >
-            <Button type="submit">
-              {wantsServerCustody ? "Create Account" : "Next: Choose Password"}
-            </Button>
-          </FormStepLayout>
-        </div>
-      )}
-      {displayState === DisplayState.INPUT_PASSWORD && (
-        <div className="flex flex-col grow">
-          <AppBackHeader
-            label="Choose custody"
-            onBackClick={() => setDisplayState(DisplayState.CHOOSE_CUSTODY)}
-          />
-          <FormStepLayout
-            className="pt-4"
-            title={<span>Master password</span>}
-            onSubmit={handleCreateSelfCustodyAccount}
-          >
-            <Input
-              type="password"
-              name="password"
-              label="Master password"
-              value={password}
-              onChange={handlePasswordChange}
-              required
-            />
-            <Input
-              type="password"
-              name="confirmPassword"
-              label="Confirm master password"
-              value={confirmPassword}
-              onChange={handleConfirmPasswordChange}
-              required
-            />
-            <span className="text-gray-11 text-sm">
-              This master password is used to encrypt a backup of your
-              interaction data on our server. You are responsible for saving
-              this password and/or manually backing up your data from the app.
-            </span>
-            <Button type="submit">Create Account</Button>
-          </FormStepLayout>
-        </div>
-      )}
-      {displayState === DisplayState.CREATING_ACCOUNT && (
-        <div className="my-auto mx-auto">
-          <Spinner label="Your account is being created." />
-        </div>
-      )}
-    </>
-  );
+  const loginHref =
+    routerSignature && routerMessage && routerPublicKey
+      ? `/login?sig=${routerSignature}&msg=${routerMessage}&pk=${routerPublicKey}`
+      : "/login";
+
+  if (displayState === DisplayState.DISPLAY) {
+    return (
+      <FormStepLayout
+        title="Welcome to Cursive Quests"
+        // description={new Date().toLocaleDateString("en-US", {
+        //   month: "long",
+        //   day: "numeric",
+        // })}
+        description="A magical journey awaits..."
+        className="pt-4"
+        onSubmit={handleSubmit}
+      >
+        <Button type="submit">
+          {loading ? "Creating Account..." : "Continue"}
+        </Button>
+        <span className="text-center text-sm" onClick={handleCreateWithEmail}>
+          <u>Create account with email and password</u>
+        </span>
+        <Link href={loginHref} className="link text-center">
+          I already have an account
+        </Link>
+      </FormStepLayout>
+    );
+  } else if (displayState === DisplayState.INPUT_EMAIL) {
+    return (
+      <FormStepLayout
+        title="Welcome to Cursive Quests"
+        // description={new Date().toLocaleDateString("en-US", {
+        //   month: "long",
+        //   day: "numeric",
+        // })}
+        description="A magical journey awaits..."
+        className="pt-4"
+        onSubmit={handleSubmitWithEmail}
+      >
+        <Input
+          type="email"
+          id="email"
+          label="Email"
+          placeholder="bob.smith@gmail.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <Input
+          type="password"
+          id="password"
+          label="Password"
+          placeholder="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <Input
+          type="password"
+          id="confirmPassword"
+          label="Confirm Password"
+          placeholder="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
+        <Button type="submit">
+          {loading ? "Creating Account..." : "Continue"}
+        </Button>
+        <span className="text-center text-sm" onClick={handleCreateWithPasskey}>
+          <u>Create account with passkey</u>
+        </span>
+      </FormStepLayout>
+    );
+  }
 }
 
 Register.getInitialProps = () => {
