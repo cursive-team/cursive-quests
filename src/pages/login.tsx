@@ -110,6 +110,7 @@ export default function Login() {
 
     console.log("d");
     const { authToken, backup, password: passwordData } = await response.json();
+    console.log("d.5", authToken, authToken.value);
     if (!authToken) {
       console.error("No auth token found");
       toast.error("Error logging in. Please try again.");

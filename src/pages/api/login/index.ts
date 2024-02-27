@@ -27,6 +27,7 @@ export default async function handler(
 
     // Generate auth token
     const authToken = await generateAuthToken(user.id);
+    console.log("authToken", authToken);
 
     // Get latest backup
     const backup = await prisma.backup.findFirst({
@@ -43,7 +44,7 @@ export default async function handler(
       return res.status(404).json({ error: "Password not found" });
     }
 
-    return res.status(200).json({
+    const responseData: LoginResponse = {
       authToken,
       backup: {
         encryptedData,
@@ -54,7 +55,9 @@ export default async function handler(
         salt: user.passwordSalt,
         hash: user.passwordHash,
       },
-    });
+    };
+    console.log("responseData", responseData);
+    return res.status(200).json(responseData);
   } catch (error) {
     console.error("Request error", error);
     return res.status(500).json({ error: "Error fetching user" });
