@@ -104,9 +104,9 @@ export default function Login() {
       return;
     }
 
-    const { passwordHash, passwordSalt } = passwordData;
-    const derivedPasswordHash = await hashPassword(password, passwordSalt);
-    if (derivedPasswordHash !== passwordHash) {
+    const { salt, hash } = passwordData;
+    const derivedPasswordHash = await hashPassword(password, salt);
+    if (derivedPasswordHash !== hash) {
       toast.error("Incorrect password");
       return;
     }
