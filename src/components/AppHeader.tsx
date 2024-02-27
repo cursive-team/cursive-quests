@@ -8,6 +8,7 @@ import Profile from "./Profile";
 import { useStateMachine } from "little-state-machine";
 import updateStateFromAction from "@/lib/shared/updateAction";
 import { ProfileDisplayState } from "@/types";
+import { Button } from "./Button";
 
 const Title = classed.h3("block text-base text-gray-12 font-light leading-5");
 const Subtitle = classed.h4("text-sm text-gray-12 leading-5");
@@ -122,6 +123,14 @@ const AppHeaderContent = ({
           </ContentWrapper>
           <ContentWrapper>
             <Title>Account</Title>
+            <Button
+              type="button"
+              onClick={() => {
+                handleSignout();
+              }}
+            >
+              Logout
+            </Button>
           </ContentWrapper>
         </>
       ),
