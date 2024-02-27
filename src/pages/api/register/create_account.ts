@@ -2,24 +2,10 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/server/prisma";
 import { object, string, boolean } from "yup";
 import { ErrorResponse } from "@/types";
-import {
-  AuthTokenResponse,
-  generateAuthToken,
-  verifySigninCode,
-} from "@/lib/server/auth";
-import { displayNameRegex } from "@/lib/shared/utils";
-import {
-  ChipType,
-  getChipIdFromIykRef,
-  getChipTypeFromChipId,
-  verifyEmailForChipId,
-} from "@/lib/server/iyk";
+import { AuthTokenResponse, generateAuthToken } from "@/lib/server/auth";
 
 const createAccountSchema = object({
-  iykRef: string().required(),
-  mockRef: string().optional().default(undefined),
   email: string().email().required(),
-  code: string().required(),
   displayName: string().required(),
   wantsServerCustody: boolean().required(),
   allowsAnalytics: boolean().required(),
@@ -27,6 +13,7 @@ const createAccountSchema = object({
   signaturePublicKey: string().required(),
   passwordSalt: string().optional(),
   passwordHash: string().optional(),
+  authPublicKey: string().optional(),
 });
 
 export default async function handler(
@@ -53,10 +40,7 @@ export default async function handler(
   }
 
   const {
-    iykRef,
-    mockRef,
     email,
-    code,
     displayName,
     wantsServerCustody,
     allowsAnalytics,
@@ -64,49 +48,33 @@ export default async function handler(
     signaturePublicKey,
     passwordSalt,
     passwordHash,
+    authPublicKey,
   } = validatedData;
 
-  if (!displayNameRegex.test(displayName)) {
-    return res.status(400).json({
-      error:
-        "Invalid display name. Must be alphanumeric and less than 20 characters",
-    });
-  }
-
-  // Validate iykRef corresponds to an unregistered person chip
-  const enableMockRef = mockRef === "true";
-  const { chipId } = await getChipIdFromIykRef(iykRef, enableMockRef);
-  if (chipId === undefined) {
-    return res.status(400).json({ error: "Invalid iykRef" });
-  }
-  const chipType = await getChipTypeFromChipId(chipId, enableMockRef);
-  if (chipType !== ChipType.PERSON) {
-    return res.status(400).json({ error: "Invalid iykRef" });
-  }
   const existingUser = await prisma.user.findUnique({
     where: {
-      chipId,
+      email,
     },
   });
   if (existingUser) {
     return res.status(400).json({ error: "Card already registered" });
   }
 
-  const emailMatchesChipId = verifyEmailForChipId(chipId, email);
-  if (!emailMatchesChipId) {
-    return res.status(400).json({ error: "Email does not match iykRef" });
-  }
-
-  // Verify the signin code is valid
-  const verifySigninCodeResult = await verifySigninCode(email, code, true);
-  if (!verifySigninCodeResult.success) {
-    return res.status(400).json({ error: "Invalid email code" });
+  if (authPublicKey) {
+    const authPublicKeyUser = await prisma.user.findFirst({
+      where: {
+        authPublicKey,
+      },
+    });
+    if (authPublicKeyUser) {
+      return res.status(400).json({ error: "Card already registered" });
+    }
   }
 
   // Create user
   const user = await prisma.user.create({
     data: {
-      chipId,
+      chipId: email,
       email,
       displayName,
       wantsServerCustody,
@@ -115,6 +83,7 @@ export default async function handler(
       signaturePublicKey,
       passwordSalt,
       passwordHash,
+      authPublicKey,
     },
   });
 

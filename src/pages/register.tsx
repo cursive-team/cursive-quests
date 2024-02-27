@@ -272,6 +272,7 @@ export default function Register() {
           type="password"
           id="password"
           label="Password"
+          placeholder="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
@@ -279,6 +280,7 @@ export default function Register() {
           type="password"
           id="confirmPassword"
           label="Confirm Password"
+          placeholder="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />

@@ -37,8 +37,18 @@ import {
 } from "@simplewebauthn/browser";
 import { sha256 } from "js-sha256";
 
+enum DisplayState {
+  DISPLAY,
+  INPUT_EMAIL,
+}
+
 export default function Login() {
   const router = useRouter();
+  const [displayState, setDisplayState] = useState<DisplayState>(
+    DisplayState.DISPLAY
+  );
+  const [email, setEmail] = useState<string>();
+  const [password, setPassword] = useState<string>();
 
   const handleSubmit = async (e: FormEvent<Element>) => {
     e.preventDefault();
@@ -59,6 +69,17 @@ export default function Login() {
 
     const username = sha256(id);
     await login(username, id);
+  };
+
+  const handleSubmitWithEmail = async (e: FormEvent<Element>) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      toast.error("Please enter your email and password");
+      return;
+    }
+
+    await login(email, password);
   };
 
   const login = async (username: string, password: string) => {
@@ -114,22 +135,63 @@ export default function Login() {
     router.push("/");
   };
 
-  return (
-    <FormStepLayout
-      title="Login to Cursive Quests"
-      description={new Date().toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-      })}
-      className="pt-4"
-      onSubmit={handleSubmit}
-    >
-      <Button type="submit">Continue</Button>
-      <Link href="/register" className="link text-center">
-        I do not have an account
-      </Link>
-    </FormStepLayout>
-  );
+  if (displayState === DisplayState.DISPLAY) {
+    return (
+      <FormStepLayout
+        title="Login to Cursive Quests"
+        description={new Date().toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+        })}
+        className="pt-4"
+        onSubmit={handleSubmit}
+      >
+        <Button type="submit">Login</Button>
+        <Button onClick={() => setDisplayState(DisplayState.INPUT_EMAIL)}>
+          Login with email and password
+        </Button>
+        <Link href="/register" className="link text-center">
+          I do not have an account
+        </Link>
+      </FormStepLayout>
+    );
+  } else if (displayState === DisplayState.INPUT_EMAIL) {
+    return (
+      <FormStepLayout
+        title="Login to Cursive Quests"
+        description={new Date().toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+        })}
+        className="pt-4"
+        onSubmit={handleSubmitWithEmail}
+      >
+        <Input
+          type="email"
+          id="email"
+          label="Email"
+          placeholder="bob.smith@gmail.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <Input
+          type="password"
+          id="password"
+          label="Password"
+          placeholder="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <Button type="submit">Login</Button>
+        <Button onClick={() => setDisplayState(DisplayState.DISPLAY)}>
+          Login with passkey
+        </Button>
+        <Link href="/register" className="link text-center">
+          I do not have an account
+        </Link>
+      </FormStepLayout>
+    );
+  }
 }
 
 Login.getInitialProps = () => {
