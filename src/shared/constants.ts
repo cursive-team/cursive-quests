@@ -18,13 +18,13 @@ export const StoreSortMapping: Record<StoreSortMappingType, string> = {
   REDEEMED: "Redeemed",
 };
 
-export const WebauthnRegistrationOptions = {
+export const webauthnRegistrationOptions = {
   rpName: "cursive-quests",
   rpID: "cursive",
   userID: "user",
   userName: "username",
 };
 
-export const WebauthnAuthenticationOptions = {
+export const webauthnAuthenticationOptions = {
   rpID: "cursive",
 };
