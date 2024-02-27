@@ -91,7 +91,6 @@ export default function Login() {
 
   const login = async (username: string, password: string) => {
     setLoading(true);
-    toast.info("username: " + username);
     console.log("b");
     const response = await fetch("/api/login", {
       method: "POST",
@@ -137,9 +136,10 @@ export default function Login() {
       password
     );
 
-    console.log("g");
+    console.log("g", authToken, decryptedBackupData);
     // Populate localStorage with auth and backup data to load messages
     saveAuthToken(authToken);
+    console.log("wtf");
     loadBackup(decryptedBackupData);
     console.log("h", authToken, decryptedBackupData);
 
