@@ -35,6 +35,7 @@ import {
   startRegistration,
 } from "@simplewebauthn/browser";
 import { sha256 } from "js-sha256";
+import { usePlausible } from "next-plausible";
 
 enum DisplayState {
   DISPLAY,
@@ -50,12 +51,15 @@ export default function Register() {
   const [password, setPassword] = useState<string>();
   const [confirmPassword, setConfirmPassword] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const plausible = usePlausible();
 
   const handleCreateWithEmail = () => {
+    plausible("switchToEmailRegister");
     setDisplayState(DisplayState.INPUT_EMAIL);
   };
 
   const handleCreateWithPasskey = () => {
+    plausible("switchToPasskeyRegister");
     setDisplayState(DisplayState.DISPLAY);
   };
 

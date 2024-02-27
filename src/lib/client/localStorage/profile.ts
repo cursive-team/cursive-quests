@@ -22,7 +22,7 @@ export type Profile = {
 
 export const profileSchema = object({
   displayName: string().required(),
-  email: string().email().required(),
+  email: string().required(),
   encryptionPublicKey: string().required(),
   signaturePublicKey: string().required(),
   wantsServerCustody: boolean().required(),

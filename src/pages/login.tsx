@@ -37,6 +37,7 @@ import {
   startRegistration,
 } from "@simplewebauthn/browser";
 import { sha256 } from "js-sha256";
+import { usePlausible } from "next-plausible";
 
 enum DisplayState {
   DISPLAY,
@@ -51,6 +52,17 @@ export default function Login() {
   const [email, setEmail] = useState<string>();
   const [password, setPassword] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const plausible = usePlausible();
+
+  const handleEmailLogin = () => {
+    plausible("switchToEmailLogin");
+    setDisplayState(DisplayState.INPUT_EMAIL);
+  };
+
+  const handlePasskeyLogin = () => {
+    plausible("switchToPasskeyLogin");
+    setDisplayState(DisplayState.DISPLAY);
+  };
 
   const handleSubmit = async (e: FormEvent<Element>) => {
     e.preventDefault();
@@ -110,14 +122,8 @@ export default function Login() {
     }
 
     console.log("d");
-    const {
-      authToken: serverToken,
-      backup,
-      password: passwordData,
-    } = await response.json();
-    console.log("d.5", serverToken, serverToken.value, serverToken.expiresAt);
-    const { value, expiresAt } = serverToken;
-    const authToken: AuthToken = { value, expiresAt: new Date(expiresAt) };
+    const { authToken, backup, password: passwordData } = await response.json();
+    console.log("d.5", authToken, authToken.value, authToken.expiresAt);
     if (!authToken) {
       console.error("No auth token found");
       toast.error("Error logging in. Please try again.");
@@ -147,7 +153,7 @@ export default function Login() {
     console.log("g", authToken, decryptedBackupData);
     // Populate localStorage with auth and backup data to load messages
     saveAuthToken(authToken);
-    console.log("wtf");
+    console.log("g.5");
     loadBackup(decryptedBackupData);
     console.log("h", authToken, decryptedBackupData);
 
@@ -180,10 +186,7 @@ export default function Login() {
         onSubmit={handleSubmit}
       >
         <Button type="submit">{loading ? "Logging in..." : "Login"}</Button>
-        <span
-          className="text-center text-sm"
-          onClick={() => setDisplayState(DisplayState.INPUT_EMAIL)}
-        >
+        <span className="text-center text-sm" onClick={handleEmailLogin}>
           <u>Login with email and password</u>
         </span>
         <Link href="/register" className="link text-center">
@@ -220,10 +223,7 @@ export default function Login() {
           onChange={(e) => setPassword(e.target.value)}
         />
         <Button type="submit">{loading ? "Logging in..." : "Login"}</Button>
-        <span
-          className="text-center text-sm"
-          onClick={() => setDisplayState(DisplayState.DISPLAY)}
-        >
+        <span className="text-center text-sm" onClick={handlePasskeyLogin}>
           <u>Login with passkey</u>
         </span>
         <Link href="/register" className="link text-center">
