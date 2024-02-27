@@ -11,6 +11,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { StateMachineProvider } from "little-state-machine";
+import PlausibleProvider from "next-plausible";
 import type { AppProps } from "next/app";
 import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
@@ -42,42 +43,44 @@ export default function App({ Component, pageProps }: AppProps) {
   }
 
   return (
-    <StateMachineProvider>
-      <QueryClientProvider client={queryClient}>
-        <OnlyMobileLayout>
-          <div
-            className="flex flex-col"
-            style={{
-              height: `${pageHeight}px`,
-            }}
-          >
-            <div className="flex flex-col grow">
-              {showHeader && !fullPage && (
-                <AppHeader
-                  isMenuOpen={isMenuOpen}
-                  setIsMenuOpen={setIsMenuOpen}
-                />
-              )}
-              <div
-                className={`flex flex-col grow px-4 xs:px-4 ${
-                  footerVisible ? "mb-20" : ""
-                }`}
-              >
-                <Component {...pageProps} />
-              </div>
-              {/* <TransitionWrapper.Fade show={!isMenuOpen}>
+    <PlausibleProvider domain="quests.cursive.team">
+      <StateMachineProvider>
+        <QueryClientProvider client={queryClient}>
+          <OnlyMobileLayout>
+            <div
+              className="flex flex-col"
+              style={{
+                height: `${pageHeight}px`,
+              }}
+            >
+              <div className="flex flex-col grow">
+                {showHeader && !fullPage && (
+                  <AppHeader
+                    isMenuOpen={isMenuOpen}
+                    setIsMenuOpen={setIsMenuOpen}
+                  />
+                )}
+                <div
+                  className={`flex flex-col grow px-4 xs:px-4 ${
+                    footerVisible ? "mb-20" : ""
+                  }`}
+                >
+                  <Component {...pageProps} />
+                </div>
+                {/* <TransitionWrapper.Fade show={!isMenuOpen}>
                 <>{showFooter && !fullPage && <AppFooter />}</>
               </TransitionWrapper.Fade> */}
+              </div>
             </div>
-          </div>
-        </OnlyMobileLayout>
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            duration: 5000,
-          }}
-        />
-      </QueryClientProvider>
-    </StateMachineProvider>
+          </OnlyMobileLayout>
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              duration: 5000,
+            }}
+          />
+        </QueryClientProvider>
+      </StateMachineProvider>
+    </PlausibleProvider>
   );
 }

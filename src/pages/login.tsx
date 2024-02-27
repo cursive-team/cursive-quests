@@ -5,6 +5,7 @@ import { generateEncryptionKeyPair } from "@/lib/client/encryption";
 import { generateSignatureKeyPair, sign } from "@/lib/shared/signature";
 import { generateSalt, hashPassword } from "@/lib/client/utils";
 import {
+  AuthToken,
   createBackup,
   deleteAccountFromLocalStorage,
   loadBackup,
@@ -109,8 +110,14 @@ export default function Login() {
     }
 
     console.log("d");
-    const { authToken, backup, password: passwordData } = await response.json();
-    console.log("d.5", authToken, authToken.value);
+    const {
+      authToken: serverToken,
+      backup,
+      password: passwordData,
+    } = await response.json();
+    console.log("d.5", serverToken, serverToken.value, serverToken.expiresAt);
+    const { value, expiresAt } = serverToken;
+    const authToken: AuthToken = { value, expiresAt: new Date(expiresAt) };
     if (!authToken) {
       console.error("No auth token found");
       toast.error("Error logging in. Please try again.");
