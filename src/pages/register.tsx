@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/Button";
 import { FormStepLayout } from "@/layouts/FormStepLayout";
 import Link from "next/link";
