@@ -1,8 +1,36 @@
-import { Button } from "@/components/Button";
-import { FormStepLayout } from "@/layouts/FormStepLayout";
-import Link from "next/link";
+import React, { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/router";
-import { FormEvent, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { generateEncryptionKeyPair } from "@/lib/client/encryption";
+import { generateSignatureKeyPair, sign } from "@/lib/shared/signature";
+import { generateSalt, hashPassword } from "@/lib/client/utils";
+import {
+  createBackup,
+  deleteAccountFromLocalStorage,
+  saveAuthToken,
+  saveKeys,
+  saveProfile,
+} from "@/lib/client/localStorage";
+import { verifySigninCodeResponseSchema } from "../lib/server/auth";
+import { encryptBackupString } from "@/lib/shared/backup";
+import { Button } from "@/components/Button";
+import { Input } from "@/components/Input";
+import Link from "next/link";
+import { FormStepLayout } from "@/layouts/FormStepLayout";
+import { toast } from "sonner";
+import {
+  displayNameRegex,
+  farcasterUsernameRegex,
+  handleNicknameChange,
+  telegramUsernameRegex,
+  twitterUsernameRegex,
+} from "@/lib/shared/utils";
+import { Spinner } from "@/components/Spinner";
+import { Radio } from "@/components/Radio";
+import { Checkbox } from "@/components/Checkbox";
+import { loadMessages } from "@/lib/client/jubSignalClient";
+import { encryptRegisteredMessage } from "@/lib/client/jubSignal/registered";
+import { AppBackHeader } from "@/components/AppHeader";
 import {
   generateAuthenticationOptions,
   generateRegistrationOptions,
@@ -13,7 +41,7 @@ import {
   startAuthentication,
   startRegistration,
 } from "@simplewebauthn/browser";
-import { Input } from "@/components/Input";
+import { sha256 } from "js-sha256";
 
 enum DisplayState {
   INPUT_EMAIL,
@@ -26,8 +54,6 @@ enum DisplayState {
 
 export default function Register() {
   const router = useRouter();
-  const [id, setId] = useState<string>("");
-  const [publicKey, setPublicKey] = useState<string | undefined>("");
   const [displayState, setDisplayState] = useState<DisplayState>(
     DisplayState.INPUT_EMAIL
   );
@@ -35,20 +61,156 @@ export default function Register() {
   const handleSubmit = async (e: FormEvent<Element>) => {
     e.preventDefault();
 
-    console.log("a");
     const registrationOptions = await generateRegistrationOptions({
       rpName: "cursive-quests",
       rpID: window.location.hostname,
-      userID: "userId",
-      userName: "username",
+      userID: "cursive",
+      userName: "Cursive Quests",
       attestationType: "none",
     });
-    console.log("a");
-    const { id, response } = await startRegistration(registrationOptions);
-    console.log("c");
-    const publicKey = response.publicKey;
-    setId(id);
-    setPublicKey(publicKey);
+
+    try {
+      const { id, response: authResponse } = await startRegistration(
+        registrationOptions
+      );
+      const authPublicKey = authResponse.publicKey;
+      if (!authPublicKey) {
+        throw new Error("No public key returned from authenticator");
+      }
+
+      const username = sha256(id);
+      await createAccount(username, id, authPublicKey);
+    } catch (error) {
+      console.error("Error creating account: ", error);
+      toast.error("Authentication failed! Please try again.");
+      return;
+    }
+  };
+
+  const createAccount = async (
+    email: string,
+    password: string,
+    authPublicKey: string | undefined
+  ) => {
+    const { privateKey, publicKey } = await generateEncryptionKeyPair();
+    const { signingKey, verifyingKey } = generateSignatureKeyPair();
+
+    let passwordSalt, passwordHash;
+    passwordSalt = generateSalt();
+    passwordHash = await hashPassword(password, passwordSalt);
+
+    const displayName = email;
+    const wantsServerCustody = false;
+    const allowsAnalytics = false;
+    const response = await fetch("/api/register/create_account", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        displayName,
+        wantsServerCustody,
+        allowsAnalytics,
+        encryptionPublicKey: publicKey,
+        signaturePublicKey: verifyingKey,
+        passwordSalt,
+        passwordHash,
+        authPublicKey,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`HTTP error! status: ${response.status}`);
+      toast.error("Error creating account! Please try again.");
+      return;
+    }
+
+    const data = await response.json();
+    if (!data.value || !data.expiresAt) {
+      console.error("Account created, but no auth token returned.");
+      toast.error("Account created, but error logging in! Please try again.");
+      return;
+    }
+
+    // Ensure the user is logged out of an existing session before creating a new account
+    deleteAccountFromLocalStorage();
+    saveKeys({
+      encryptionPrivateKey: privateKey,
+      signaturePrivateKey: signingKey,
+    });
+    saveProfile({
+      displayName,
+      email,
+      encryptionPublicKey: publicKey,
+      signaturePublicKey: verifyingKey,
+      wantsServerCustody,
+      allowsAnalytics,
+    });
+    saveAuthToken({
+      value: data.value,
+      expiresAt: new Date(data.expiresAt),
+    });
+
+    let backupData = createBackup();
+    if (!backupData) {
+      console.error("Error creating backup!");
+      toast.error("Error creating backup! Please try again.");
+      return;
+    }
+
+    // Encrypt backup data if user wants self custody
+    const backup = wantsServerCustody
+      ? backupData
+      : encryptBackupString(backupData, email, password);
+
+    const backupResponse = await fetch("/api/backup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        backup,
+        wantsServerCustody,
+        authToken: data.value,
+      }),
+    });
+
+    if (!backupResponse.ok) {
+      console.error(`HTTP error! status: ${backupResponse.status}`);
+      toast.error("Error storing backup! Please try again.");
+      return;
+    }
+
+    // Send a jubSignal message to self to store the signature
+    const dataToSign = uuidv4().replace(/-/g, ""); // For now, we just sign a random uuid as a hex string
+    const signature = sign(signingKey, dataToSign);
+    const recipientPublicKey = publicKey;
+    const encryptedMessage = await encryptRegisteredMessage({
+      signaturePublicKey: verifyingKey,
+      signatureMessage: dataToSign,
+      signature,
+      senderPrivateKey: privateKey,
+      recipientPublicKey,
+    });
+    try {
+      await loadMessages({
+        forceRefresh: false,
+        messageRequests: [
+          {
+            encryptedMessage,
+            recipientPublicKey,
+          },
+        ],
+      });
+    } catch (error) {
+      console.error("Error sending registration tap to server: ", error);
+      toast.error("An error occured while registering.");
+      return;
+    }
+
+    toast.success("Account created and backed up!");
+    router.push("/");
   };
 
   return (
@@ -61,8 +223,6 @@ export default function Register() {
       className="pt-4"
       onSubmit={handleSubmit}
     >
-      <Input type="text" id="id" label="Id" value={id} />
-      <Input type="text" id="publicKey" label="Public Key" value={publicKey} />
       <Button type="submit">Continue</Button>
       <Link href="/login" className="link text-center">
         I already have an account

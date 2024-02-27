@@ -9,18 +9,16 @@ import { ErrorResponse } from "../../../types";
 import { BackupResponse } from "../backup";
 import { decryptBackupString } from "@/lib/shared/backup";
 
-export type LoginResponse =
-  | {
-      authToken: AuthTokenResponse;
-      backup: BackupResponse;
-      password:
-        | {
-            salt: string;
-            hash: string;
-          }
-        | undefined;
-    }
-  | ErrorResponse;
+export type LoginResponse = {
+  authToken: AuthTokenResponse;
+  backup: BackupResponse;
+  password:
+    | {
+        salt: string;
+        hash: string;
+      }
+    | undefined;
+};
 
 export default async function handler(
   req: NextApiRequest,
