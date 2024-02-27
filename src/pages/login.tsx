@@ -71,9 +71,8 @@ export default function Login() {
       return;
     }
 
-    toast.info("Your id: " + id);
-
     const username = sha256(id);
+    console.log("a", username, id);
     await login(username, id);
   };
 
@@ -92,6 +91,8 @@ export default function Login() {
 
   const login = async (username: string, password: string) => {
     setLoading(true);
+    toast.info("username: " + username);
+    console.log("b");
     const response = await fetch("/api/login", {
       method: "POST",
       headers: {
@@ -100,6 +101,7 @@ export default function Login() {
       body: JSON.stringify({ username }),
     });
 
+    console.log("c");
     if (!response.ok) {
       console.error("Error logging in");
       toast.error("Error logging in. Please try again.");
@@ -107,6 +109,7 @@ export default function Login() {
       return;
     }
 
+    console.log("d");
     const { authToken, backup, password: passwordData } = await response.json();
     if (!authToken) {
       console.error("No auth token found");
@@ -115,6 +118,7 @@ export default function Login() {
       return;
     }
 
+    console.log("e");
     const { salt, hash } = passwordData;
     const derivedPasswordHash = await hashPassword(password, salt);
     if (derivedPasswordHash !== hash) {
@@ -123,6 +127,7 @@ export default function Login() {
       return;
     }
 
+    console.log("f");
     const { encryptedData, authenticationTag, iv } = backup;
     const decryptedBackupData = decryptBackupString(
       encryptedData,
@@ -132,6 +137,7 @@ export default function Login() {
       password
     );
 
+    console.log("g");
     // Populate localStorage with auth and backup data to load messages
     saveAuthToken(authToken);
     loadBackup(decryptedBackupData);

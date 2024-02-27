@@ -81,8 +81,6 @@ export default function Register() {
         throw new Error("No public key returned from authenticator");
       }
 
-      toast.info("Your id: " + id);
-
       const username = sha256(id);
       await createAccount(username, id, authPublicKey);
     } catch (error) {
