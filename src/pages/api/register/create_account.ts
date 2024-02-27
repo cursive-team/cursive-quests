@@ -5,7 +5,7 @@ import { ErrorResponse } from "@/types";
 import { AuthTokenResponse, generateAuthToken } from "@/lib/server/auth";
 
 const createAccountSchema = object({
-  email: string().email().required(),
+  email: string().required(),
   displayName: string().required(),
   wantsServerCustody: boolean().required(),
   allowsAnalytics: boolean().required(),
