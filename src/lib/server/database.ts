@@ -32,8 +32,11 @@ export const getQuestById = async (
             select: {
               id: true,
               name: true,
+              description: true,
               imageUrl: true,
               signaturePublicKey: true,
+              alternateText: true,
+              infoText: true,
             },
           },
         },
@@ -101,8 +104,11 @@ export const itemWithRequirementsSelector = {
               select: {
                 id: true,
                 name: true,
+                description: true,
                 imageUrl: true,
                 signaturePublicKey: true,
+                alternateText: true,
+                infoText: true,
               },
             },
           },

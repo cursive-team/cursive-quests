@@ -14,6 +14,9 @@ import {
   getLocationSignature,
 } from "@/lib/client/localStorage";
 import { ListWrapper } from "../wrappers/ListWrapper";
+import Linkify from "react-linkify";
+import { Button } from "../Button";
+import { getNonceFromCounterMessage } from "@/lib/client/libhalo";
 
 const Label = classed.span("text-xs text-gray-10 font-light");
 const Description = classed.span("text-gray-12 text-sm font-light");
@@ -70,35 +73,108 @@ const SingleLocation = ({
 }: SingleLocationProps) => {
   const { pageWidth } = useSettings();
   const imageWidth = pageWidth - 38;
-
   const signature: LocationSignature | undefined = getLocationSignature(
     location.id.toString()
   );
+  const [showHint, setShowHint] = useState<boolean>(false);
+
+  const handleShowHint = () => {
+    setShowHint(true);
+  };
 
   return (
     <>
-      <Header title={title} label="Requirement" />
-      <div className="flex flex-col gap-4 mt-2">
+      <Header title={location.name} label="Location" />
+      <div className="flex flex-col gap-4">
         <div
-          className="bg-slate-200 rounded bg-cover bg-center bg-no-repeat object-cover overflow-hidden mx-auto"
+          className="flex bg-slate-200 rounded bg-center bg-cover"
           style={{
-            width: `${imageWidth}px`,
-            height: `${imageWidth}px`,
+            width: `${pageWidth - 32}px`,
+            height: `${pageWidth - 32}px`,
             backgroundImage: `url(${location.imageUrl})`,
           }}
-        ></div>
-
-        <div key={location.id} className="flex gap-6">
+        />
+        <div className="flex flex-col gap-4 jus">
           <div className="flex flex-col">
-            <Label>Location</Label>
-            <Description>{location.name}</Description>
+            <Label>This Location</Label>
+            <Description>
+              <Linkify
+                componentDecorator={(decoratedHref, decoratedText, key) => (
+                  <a
+                    target="_blank"
+                    href={decoratedHref}
+                    key={key}
+                    style={{ textDecoration: "underline" }}
+                  >
+                    {decoratedText}
+                  </a>
+                )}
+              >
+                {location.infoText}
+              </Linkify>
+            </Description>
           </div>
+          {location.description && (
+            <div className="flex flex-col">
+              <Label>Your Next Clue</Label>
+              <Description>
+                <Linkify
+                  componentDecorator={(decoratedHref, decoratedText, key) => (
+                    <a
+                      target="_blank"
+                      href={decoratedHref}
+                      key={key}
+                      style={{ textDecoration: "underline" }}
+                    >
+                      {decoratedText}
+                    </a>
+                  )}
+                >
+                  {location.description}
+                </Linkify>
+              </Description>
+            </div>
+          )}
+          {location.alternateText ? (
+            showHint ? (
+              <div className="flex flex-col">
+                <Label>Hint (Booooooo)</Label>
+                <Description>
+                  <Linkify
+                    componentDecorator={(decoratedHref, decoratedText, key) => (
+                      <a
+                        target="_blank"
+                        href={decoratedHref}
+                        key={key}
+                        style={{ textDecoration: "underline" }}
+                      >
+                        {decoratedText}
+                      </a>
+                    )}
+                  >
+                    {location.alternateText}
+                  </Linkify>
+                </Description>
+              </div>
+            ) : (
+              <Button onClick={handleShowHint}>Stuck?</Button>
+            )
+          ) : null}
           {signature !== undefined && (
             <div className="flex flex-col">
               <Label>Visited On</Label>
-              <Description>{`${signature?.ts}`}</Description>
+              <Description>{`${signature.ts}`}</Description>
             </div>
           )}
+          {signature !== undefined &&
+            getNonceFromCounterMessage(signature.msg) !== undefined && (
+              <div className="flex flex-col">
+                <Label>Visitor No.</Label>
+                <Description>{`${getNonceFromCounterMessage(
+                  signature.msg
+                )}`}</Description>
+              </div>
+            )}
         </div>
       </div>
     </>

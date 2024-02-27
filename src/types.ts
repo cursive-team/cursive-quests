@@ -41,8 +41,11 @@ export type UserRequirement = {
 export type LocationRequirementPreview = {
   id: number;
   name: string;
+  description: string;
   imageUrl: string;
   signaturePublicKey: string;
+  infoText: string | null;
+  alternateText: string | null;
 };
 
 export type LocationRequirement = {
