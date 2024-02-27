@@ -67,7 +67,7 @@ const AppHeaderContent = ({
   handleSignout,
 }: AppHeaderContentProps) => {
   const { actions, getState } = useStateMachine({ updateStateFromAction });
-  const [activeMenuIndex, setActiveMenuIndex] = useState<number | null>(null);
+  const [activeMenuIndex, setActiveMenuIndex] = useState<number>(1);
 
   const profileViewState: ProfileDisplayState =
     getState().profileView || ProfileDisplayState.VIEW;
@@ -147,7 +147,7 @@ const AppHeaderContent = ({
       });
     }
 
-    setActiveMenuIndex(null);
+    setActiveMenuIndex(1);
   };
 
   const showBackButton = activeMenuIndex !== null;
@@ -155,7 +155,7 @@ const AppHeaderContent = ({
   return (
     <div className="fixed inset-0 w-full overflow-auto px-3 xs:px-4 z-10 h-full bg-black">
       <div className="flex h-[60px]">
-        {showBackButton && (
+        {/* {showBackButton && (
           <button
             onClick={onBack}
             type="button"
@@ -164,7 +164,7 @@ const AppHeaderContent = ({
             <Icons.arrowLeft />
             <span className="text-gray-11">Back</span>
           </button>
-        )}
+        )} */}
         <button
           type="button"
           onClick={() => {

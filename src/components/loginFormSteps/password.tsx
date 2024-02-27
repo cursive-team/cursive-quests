@@ -90,7 +90,7 @@ const LoginStepPassword = ({
       <AppBackHeader onBackClick={onBack} />
       <FormStepLayout
         title="Login"
-        description="Welcome to ETHDenver"
+        description="Welcome to Cursive Quests"
         onSubmit={handleSubmit(onSubmit)}
       >
         <Input

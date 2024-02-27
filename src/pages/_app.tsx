@@ -65,9 +65,9 @@ export default function App({ Component, pageProps }: AppProps) {
               >
                 <Component {...pageProps} />
               </div>
-              <TransitionWrapper.Fade show={!isMenuOpen}>
+              {/* <TransitionWrapper.Fade show={!isMenuOpen}>
                 <>{showFooter && !fullPage && <AppFooter />}</>
-              </TransitionWrapper.Fade>
+              </TransitionWrapper.Fade> */}
             </div>
           </div>
         </OnlyMobileLayout>

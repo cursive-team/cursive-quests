@@ -213,7 +213,7 @@ const ProfileForm = ({
             name="custody"
             value="self"
             label="Self custody"
-            description="Your ETHDenver interaction data is private to you, encrypted by a master password set on the next page. ZK proofs are used to prove quest completion."
+            description="Your Cursive Quests interaction data is private to you, encrypted by a master password set on the next page. ZK proofs are used to prove quest completion."
             checked={!wantsServerCustody}
             disabled={isReadOnly}
             onChange={() =>
@@ -228,7 +228,7 @@ const ProfileForm = ({
             name="custody"
             value="server"
             label="Server custody"
-            description="Your ETHDenver interaction data is stored in plaintext, and may be shared with third parties."
+            description="Your Cursive Quests interaction data is stored in plaintext, and may be shared with third parties."
             checked={wantsServerCustody}
             disabled={isReadOnly}
             onChange={() =>

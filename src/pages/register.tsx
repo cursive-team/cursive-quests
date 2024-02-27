@@ -390,7 +390,7 @@ export default function Register() {
     <>
       {displayState === DisplayState.INPUT_EMAIL && (
         <FormStepLayout
-          title="Welcome to ETHDenver"
+          title="Welcome to Cursive Quests"
           description={new Date().toLocaleDateString("en-US", {
             month: "long",
             day: "numeric",
@@ -524,16 +524,16 @@ export default function Register() {
             header={
               <fieldset className="flex flex-col gap-6">
                 <span className="text-gray-11 text-sm">
-                  IYK has partnerned with Cursive to integrate ZK tech into this
-                  experience to enable full data ownership and portability.
-                  Choose if you want to enable it.
+                  {
+                    "We've integrated ZK tech into this experience to enable full data ownership and portability. Choose if you want to enable it."
+                  }
                 </span>
                 <Radio
                   id="selfCustody"
                   name="custody"
                   value="self"
                   label="Self custody"
-                  description="Your ETHDenver interaction data is private to you, encrypted by a master password set on the next page. ZK proofs are used to prove quest completion."
+                  description="Your Cursive Quests interaction data is private to you, encrypted by a master password set on the next page. ZK proofs are used to prove quest completion."
                   checked={!wantsServerCustody}
                   onChange={() => setWantsServerCustody(false)}
                 />
@@ -543,7 +543,7 @@ export default function Register() {
                   name="custody"
                   value="server"
                   label="Server custody"
-                  description="Your ETHDenver interaction data is stored in plaintext, and may be shared with third parties."
+                  description="Your Cursive Quests interaction data is stored in plaintext, and may be shared with third parties."
                   checked={wantsServerCustody}
                   onChange={() => setWantsServerCustody(true)}
                 />
