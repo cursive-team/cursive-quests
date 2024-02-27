@@ -139,10 +139,11 @@ export default function Login() {
     return (
       <FormStepLayout
         title="Login to Cursive Quests"
-        description={new Date().toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-        })}
+        // description={new Date().toLocaleDateString("en-US", {
+        //   month: "long",
+        //   day: "numeric",
+        // })}
+        description="A magical journey awaits..."
         className="pt-4"
         onSubmit={handleSubmit}
       >
@@ -162,10 +163,11 @@ export default function Login() {
     return (
       <FormStepLayout
         title="Login to Cursive Quests"
-        description={new Date().toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-        })}
+        // description={new Date().toLocaleDateString("en-US", {
+        //   month: "long",
+        //   day: "numeric",
+        // })}
+        description="A magical journey awaits..."
         className="pt-4"
         onSubmit={handleSubmitWithEmail}
       >

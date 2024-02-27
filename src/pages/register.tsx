@@ -233,10 +233,11 @@ export default function Register() {
     return (
       <FormStepLayout
         title="Welcome to Cursive Quests"
-        description={new Date().toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-        })}
+        // description={new Date().toLocaleDateString("en-US", {
+        //   month: "long",
+        //   day: "numeric",
+        // })}
+        description="A magical journey awaits..."
         className="pt-4"
         onSubmit={handleSubmit}
       >
@@ -253,10 +254,11 @@ export default function Register() {
     return (
       <FormStepLayout
         title="Welcome to Cursive Quests"
-        description={new Date().toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-        })}
+        // description={new Date().toLocaleDateString("en-US", {
+        //   month: "long",
+        //   day: "numeric",
+        // })}
+        description="A magical journey awaits..."
         className="pt-4"
         onSubmit={handleSubmitWithEmail}
       >
