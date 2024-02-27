@@ -54,6 +54,10 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const plausible = usePlausible();
 
+  const routerSignature = router.query.sig as string | undefined;
+  const routerMessage = router.query.msg as string | undefined;
+  const routerPublicKey = router.query.pk as string | undefined;
+
   const handleEmailLogin = () => {
     plausible("switchToEmailLogin");
     setDisplayState(DisplayState.INPUT_EMAIL);
@@ -160,6 +164,11 @@ export default function Login() {
     router.push("/");
   };
 
+  const registerHref =
+    routerSignature && routerMessage && routerPublicKey
+      ? `/register?sig=${routerSignature}&msg=${routerMessage}&pk=${routerPublicKey}`
+      : "/register";
+
   if (displayState === DisplayState.DISPLAY) {
     return (
       <FormStepLayout
@@ -176,7 +185,7 @@ export default function Login() {
         <span className="text-center text-sm" onClick={handleEmailLogin}>
           <u>Login with email and password</u>
         </span>
-        <Link href="/register" className="link text-center">
+        <Link href={registerHref} className="link text-center">
           I do not have an account
         </Link>
       </FormStepLayout>
@@ -213,9 +222,6 @@ export default function Login() {
         <span className="text-center text-sm" onClick={handlePasskeyLogin}>
           <u>Login with passkey</u>
         </span>
-        <Link href="/register" className="link text-center">
-          I do not have an account
-        </Link>
       </FormStepLayout>
     );
   }

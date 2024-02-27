@@ -53,6 +53,10 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const plausible = usePlausible();
 
+  const routerSignature = router.query.sig as string | undefined;
+  const routerMessage = router.query.msg as string | undefined;
+  const routerPublicKey = router.query.pk as string | undefined;
+
   const handleCreateWithEmail = () => {
     plausible("switchToEmailRegister");
     setDisplayState(DisplayState.INPUT_EMAIL);
@@ -244,8 +248,19 @@ export default function Register() {
 
     toast.success("Account created and backed up!");
     setLoading(false);
-    router.push("/");
+    if (routerSignature && routerMessage && routerPublicKey) {
+      router.push(
+        `/tap?sig=${routerSignature}&msg=${routerMessage}&pk=${routerPublicKey}`
+      );
+    } else {
+      router.push("/");
+    }
   };
+
+  const loginHref =
+    routerSignature && routerMessage && routerPublicKey
+      ? `/login?sig=${routerSignature}&msg=${routerMessage}&pk=${routerPublicKey}`
+      : "/login";
 
   if (displayState === DisplayState.DISPLAY) {
     return (
@@ -265,7 +280,7 @@ export default function Register() {
         <span className="text-center text-sm" onClick={handleCreateWithEmail}>
           <u>Create account with email and password</u>
         </span>
-        <Link href="/login" className="link text-center">
+        <Link href={loginHref} className="link text-center">
           I already have an account
         </Link>
       </FormStepLayout>
