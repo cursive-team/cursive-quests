@@ -116,6 +116,7 @@ model Quest {
   itemId               Int?                  @unique
   completionMessage    String?
   hideRequirements     Boolean               @default(false)
+  isHidden             Boolean               @default(false)
   createdAt            DateTime              @default(now())
   userRequirements     UserRequirement[]
   locationRequirements LocationRequirement[]

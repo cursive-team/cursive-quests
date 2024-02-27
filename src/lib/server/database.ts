@@ -79,6 +79,7 @@ export const itemWithRequirementsSelector = {
         itemId: true,
         completionMessage: true,
         hideRequirements: true,
+        isHidden: true,
         createdAt: true,
         userRequirements: {
           select: {

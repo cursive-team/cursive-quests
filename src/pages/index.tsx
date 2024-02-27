@@ -19,14 +19,19 @@ export default function QuestsPage() {
     useState<QuestTagMappingType>("ALL");
 
   const displayQuests: QuestWithCompletion[] = useMemo(() => {
-    const inProgressQuests = quests.filter((quest) => !quest.isCompleted);
-    const completedQuests = quests.filter((quest) => quest.isCompleted);
+    const notHiddenQuests = quests.filter((quest) => !quest.isHidden);
+    const inProgressQuests = notHiddenQuests.filter(
+      (quest) => !quest.isCompleted
+    );
+    const completedQuests = notHiddenQuests.filter(
+      (quest) => quest.isCompleted
+    );
     const questFilteredItems =
       selectedOption === "IN_PROGRESS"
         ? inProgressQuests
         : selectedOption === "COMPLETED"
         ? completedQuests
-        : quests;
+        : notHiddenQuests;
 
     const pinnedQuest = questFilteredItems.filter((quest) =>
       pinnedQuests.current.has(quest.id)
