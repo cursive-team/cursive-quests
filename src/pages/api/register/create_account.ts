@@ -11,9 +11,9 @@ const createAccountSchema = object({
   allowsAnalytics: boolean().required(),
   encryptionPublicKey: string().required(),
   signaturePublicKey: string().required(),
-  passwordSalt: string().optional(),
-  passwordHash: string().optional(),
-  authPublicKey: string().optional(),
+  passwordSalt: string().optional().default(undefined),
+  passwordHash: string().optional().default(undefined),
+  authPublicKey: string().optional().default(undefined),
 });
 
 export default async function handler(
