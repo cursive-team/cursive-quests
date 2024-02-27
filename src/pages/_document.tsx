@@ -3,17 +3,17 @@ import { Html, Head, Main, NextScript } from "next/document";
 export default function Document() {
   return (
     <Html lang="en">
-      <title>buidlquest.xyz</title>
+      <title>Cursive Quests</title>
       <Head>
         <meta
           name="description"
-          content="Connect with ETHDenver attendees, engage with sponsors, and unlock unique experiences by tapping NFC chips."
+          content="Unlock unique experiences by tapping NFC chips."
           key="desc"
         />
-        <meta property="og:title" content="buidlquest.xyz" />
+        <meta property="og:title" content="quests.cursive.team" />
         <meta
           property="og:description"
-          content="Connect with ETHDenver attendees, engage with sponsors, and unlock unique experiences by tapping NFC chips."
+          content="Unlock unique experiences by tapping NFC chips."
         />
         <meta property="og:image" content="/cursive.jpg" />
         <link

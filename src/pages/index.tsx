@@ -92,7 +92,7 @@ const ActivityFeed = ({ type, name, id, date }: ActivityFeedProps) => {
     case JUB_SIGNAL_MESSAGE_TYPE.REGISTERED:
       return (
         <FeedContent
-          title="Registered for BUIDLQuest!"
+          title="Registered for Cursive Quests!"
           description={date}
           icon={<CircleCard icon="person" />}
         />

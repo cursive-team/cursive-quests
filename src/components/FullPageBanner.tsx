@@ -12,8 +12,6 @@ const FullPageBanner = ({ description }: FullPageBannerProps) => {
       <div className="flex flex-col gap-8 my-auto mx-auto px-10">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-4 mx-auto">
-            <Icons.iyk size={80} />
-            <Icons.x size={12} />
             <Icons.cursive size={80} />
           </div>
           <span className="text-[36px] font-giorgio text-center">

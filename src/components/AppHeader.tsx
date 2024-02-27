@@ -84,10 +84,9 @@ const AppHeaderContent = ({
       children: (
         <>
           <ContentWrapper>
-            <Title>Information</Title>
+            <Title>Cursive Quests</Title>
             <Description>
-              This is a project in collaboration with IYK, Jubmoji and Art
-              Blocks lorem ipsum dolor sit amet.
+              Unlock unique experiences by tapping NFC chips.
             </Description>
           </ContentWrapper>
           <ContentWrapper>
@@ -111,11 +110,11 @@ const AppHeaderContent = ({
                 GitHub:{" "}
                 <u>
                   <a
-                    href="https://github.com/nfc-denver/nfc-denver"
+                    href="https://github.com/cursive-team/cursive-quests"
                     target="_blank"
                     rel="noreferrer noopener"
                   >
-                    github.com/nfc-denver/nfc-denver
+                    Github Repository
                   </a>
                 </u>
               </Subtitle>
@@ -226,8 +225,6 @@ const AppHeader = ({ isMenuOpen, setIsMenuOpen }: AppHeaderProps) => {
       {!isMenuOpen && (
         <Link href="/">
           <button type="button" className="flex gap-2 items-center">
-            <Icons.iyk />
-            <Icons.x />
             <Icons.cursiveFull />
           </button>
         </Link>
