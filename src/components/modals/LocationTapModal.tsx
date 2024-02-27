@@ -108,7 +108,7 @@ const LocationTapModal = ({
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen} withBackButton>
       <div className="flex flex-col min-h-[60vh]">
-        <div className="flex flex-col items-center gap-[10px] pt-24 pb-28">
+        <div className="flex flex-col items-center gap-[16px] pt-24 pb-28">
           <CircleCard icon="location" size="md" />
           <div className="flex flex-col gap-2 items-center mx-6">
             <span className="text-xl tracking-[-0.2px] font-light text-gray-12">
@@ -141,6 +141,12 @@ const LocationTapModal = ({
               </span>
             )}
           </div>
+          <Button
+            onClick={() => setIsOpen(false)}
+            className="w-full h-12 mt-16"
+          >
+            Continue
+          </Button>
           <div className="w-full mt-2 px-2">
             {location.displayEmailWalletLink &&
               signature &&
