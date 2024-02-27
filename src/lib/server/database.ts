@@ -74,6 +74,7 @@ export const itemWithRequirementsSelector = {
         summonId: true,
         buidlReward: true,
         itemId: true,
+        completionMessage: true,
         createdAt: true,
         userRequirements: {
           select: {
