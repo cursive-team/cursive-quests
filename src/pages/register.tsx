@@ -49,6 +49,7 @@ export default function Register() {
   const [email, setEmail] = useState<string>();
   const [password, setPassword] = useState<string>();
   const [confirmPassword, setConfirmPassword] = useState<string>();
+  const [loading, setLoading] = useState(false);
 
   const handleCreateWithEmail = () => {
     setDisplayState(DisplayState.INPUT_EMAIL);
@@ -60,6 +61,8 @@ export default function Register() {
 
   const handleSubmit = async (e: FormEvent<Element>) => {
     e.preventDefault();
+
+    setLoading(true);
 
     const registrationOptions = await generateRegistrationOptions({
       rpName: "cursive-quests",
@@ -83,6 +86,7 @@ export default function Register() {
     } catch (error) {
       console.error("Error creating account: ", error);
       toast.error("Authentication failed! Please try again.");
+      setLoading(false);
       return;
     }
   };
@@ -100,6 +104,8 @@ export default function Register() {
       return;
     }
 
+    setLoading(true);
+
     await createAccount(email, password, undefined);
   };
 
@@ -108,6 +114,8 @@ export default function Register() {
     password: string,
     authPublicKey: string | undefined
   ) => {
+    setLoading(true);
+
     const { privateKey, publicKey } = await generateEncryptionKeyPair();
     const { signingKey, verifyingKey } = generateSignatureKeyPair();
 
@@ -139,6 +147,7 @@ export default function Register() {
     if (!response.ok) {
       console.error(`HTTP error! status: ${response.status}`);
       toast.error("Error creating account! Please try again.");
+      setLoading(false);
       return;
     }
 
@@ -146,6 +155,7 @@ export default function Register() {
     if (!data.value || !data.expiresAt) {
       console.error("Account created, but no auth token returned.");
       toast.error("Account created, but error logging in! Please try again.");
+      setLoading(false);
       return;
     }
 
@@ -172,6 +182,7 @@ export default function Register() {
     if (!backupData) {
       console.error("Error creating backup!");
       toast.error("Error creating backup! Please try again.");
+      setLoading(false);
       return;
     }
 
@@ -195,6 +206,7 @@ export default function Register() {
     if (!backupResponse.ok) {
       console.error(`HTTP error! status: ${backupResponse.status}`);
       toast.error("Error storing backup! Please try again.");
+      setLoading(false);
       return;
     }
 
@@ -222,10 +234,12 @@ export default function Register() {
     } catch (error) {
       console.error("Error sending registration tap to server: ", error);
       toast.error("An error occured while registering.");
+      setLoading(false);
       return;
     }
 
     toast.success("Account created and backed up!");
+    setLoading(false);
     router.push("/");
   };
 

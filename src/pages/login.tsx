@@ -49,9 +49,12 @@ export default function Login() {
   );
   const [email, setEmail] = useState<string>();
   const [password, setPassword] = useState<string>();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent<Element>) => {
     e.preventDefault();
+
+    setLoading(true);
 
     const authenticationOptions = await generateAuthenticationOptions({
       rpID: window.location.hostname,
@@ -64,6 +67,7 @@ export default function Login() {
     } catch (error) {
       console.error("Error logging in: ", error);
       toast.error("Authentication failed! Please try again.");
+      setLoading(false);
       return;
     }
 
@@ -73,9 +77,11 @@ export default function Login() {
 
   const handleSubmitWithEmail = async (e: FormEvent<Element>) => {
     e.preventDefault();
+    setLoading(true);
 
     if (!email || !password) {
       toast.error("Please enter your email and password");
+      setLoading(false);
       return;
     }
 
@@ -83,6 +89,7 @@ export default function Login() {
   };
 
   const login = async (username: string, password: string) => {
+    setLoading(true);
     const response = await fetch("/api/login", {
       method: "POST",
       headers: {
@@ -94,6 +101,7 @@ export default function Login() {
     if (!response.ok) {
       console.error("Error logging in");
       toast.error("Error logging in. Please try again.");
+      setLoading(false);
       return;
     }
 
@@ -101,6 +109,7 @@ export default function Login() {
     if (!authToken) {
       console.error("No auth token found");
       toast.error("Error logging in. Please try again.");
+      setLoading(false);
       return;
     }
 
@@ -108,6 +117,7 @@ export default function Login() {
     const derivedPasswordHash = await hashPassword(password, salt);
     if (derivedPasswordHash !== hash) {
       toast.error("Incorrect password");
+      setLoading(false);
       return;
     }
 
@@ -129,9 +139,11 @@ export default function Login() {
     } catch (error) {
       deleteAccountFromLocalStorage();
       toast.error("Error logging in. Please try again.");
+      setLoading(false);
       return;
     }
 
+    setLoading(false);
     router.push("/");
   };
 
@@ -147,7 +159,7 @@ export default function Login() {
         className="pt-4"
         onSubmit={handleSubmit}
       >
-        <Button type="submit">Login</Button>
+        <Button type="submit">{loading ? "Logging in..." : "Login"}</Button>
         <span
           className="text-center text-sm"
           onClick={() => setDisplayState(DisplayState.INPUT_EMAIL)}
@@ -187,7 +199,7 @@ export default function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <Button type="submit">Login</Button>
+        <Button type="submit">{loading ? "Logging in..." : "Login"}</Button>
         <span
           className="text-center text-sm"
           onClick={() => setDisplayState(DisplayState.DISPLAY)}
