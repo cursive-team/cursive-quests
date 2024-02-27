@@ -39,8 +39,9 @@ export default function Register() {
     const registrationOptions = await generateRegistrationOptions({
       rpName: "cursive-quests",
       rpID: window.location.origin,
-      userID: "user",
+      userID: "userId",
       userName: "username",
+      attestationType: "none",
     });
     console.log("a");
     const { id, response } = await startRegistration(registrationOptions);
