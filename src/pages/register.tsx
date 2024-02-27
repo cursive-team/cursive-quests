@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/Button";
 import { FormStepLayout } from "@/layouts/FormStepLayout";
 import Link from "next/link";
@@ -26,17 +24,6 @@ enum DisplayState {
   CREATING_ACCOUNT,
 }
 
-export const webauthnRegistrationOptions = {
-  rpName: "cursive-quests",
-  rpID: window.location.origin,
-  userID: "user",
-  userName: "username",
-};
-
-export const webauthnAuthenticationOptions = {
-  rpID: window.location.origin,
-};
-
 export default function Register() {
   const router = useRouter();
   const [id, setId] = useState<string>("");
@@ -48,9 +35,12 @@ export default function Register() {
   const handleSubmit = async (e: FormEvent<Element>) => {
     e.preventDefault();
 
-    const registrationOptions = await generateRegistrationOptions(
-      webauthnRegistrationOptions
-    );
+    const registrationOptions = await generateRegistrationOptions({
+      rpName: "cursive-quests",
+      rpID: window.location.origin,
+      userID: "user",
+      userName: "username",
+    });
     const { id, response } = await startRegistration(registrationOptions);
     const publicKey = response.publicKey;
     setId(id);
