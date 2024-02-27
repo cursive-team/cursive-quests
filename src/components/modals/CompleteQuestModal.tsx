@@ -314,7 +314,7 @@ const CompleteQuestModal = ({
             <div className="rounded-[2px] overflow-hidden">
               <img
                 className="object-cover w-[174px] h-[174px]"
-                alt={`${sponsor} store item`}
+                alt={`${sponsor} item`}
                 src={imageUrl}
                 width={174}
                 height={174}
@@ -331,8 +331,8 @@ const CompleteQuestModal = ({
                   </span>
                 ) : (
                   <span className="text-xs font-light text-gray-900">
-                    Completing this quest allows you to redeem the above item.
-                    Present this QR code at the BUIDL Store to claim your item.
+                    Congratulations on completing this quest! Present this QR
+                    code to claim your item.
                   </span>
                 )}
               </div>
@@ -355,16 +355,26 @@ const CompleteQuestModal = ({
     switch (displayState) {
       case CompleteQuestDisplayState.INITIAL:
         return (
-          <div className="flex flex-col w-full justify-center text-center gap-5">
-            <div className="h-10 w-10 bg-slate-200 rounded-full self-center"></div>
+          <div className="flex flex-col w-full justify-center items-center text-center gap-5">
+            <Icons.quest width={24} height={24} className="items-center mb-5" />
             <div className="flex flex-col gap-1 self-center">
+              <div className="flex flex-col gap-2">
+                <span className="text-xl text-gray-12">
+                  <b>{"Completed:"}</b>
+                </span>
+              </div>
               <div className="flex flex-col gap-2">
                 <span className="text-xl text-gray-12">{quest.name}</span>
               </div>
+              {quest.completionMessage && (
+                <div className="text-sm text-gray-12 mt-2">
+                  {quest.completionMessage}
+                </div>
+              )}
             </div>
             <div className="self-center w-full">
               <Button onClick={handleCompleteQuest}>
-                Generate completion ZK Proof
+                Generate proof of completion
               </Button>
             </div>
           </div>
@@ -401,11 +411,11 @@ const CompleteQuestModal = ({
                 <span className="text-xl text-gray-12">
                   {"Completed: " + quest.name}
                 </span>
-                {quest.buidlReward > 0 && (
+                {/* {quest.buidlReward > 0 && (
                   <span className="text-xs text-gray-10 mt-4">
                     {`You've received ${quest.buidlReward} BUIDL!`}
                   </span>
-                )}
+                )} */}
               </div>
             </div>
             <div className="flex items-center gap-1 self-center">

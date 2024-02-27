@@ -38,7 +38,7 @@ const LocationTapModal = ({
   const { isPending: isLoadingQuests, data: quests = [] } = useFetchQuests();
   const { numRequirementsSatisfied } = useQuestRequirements(quests);
   const locationQuestRequirementIds = location.questRequirements.map(
-    (quest) => quest.id
+    (quest) => quest.questId
   );
   const [mintDisplayState, setMintDisplayState] = useState<MintDisplayState>(
     MintDisplayState.DISPLAY
@@ -136,7 +136,7 @@ const LocationTapModal = ({
                     </a>
                   )}
                 >
-                  {location.description}
+                  {"Your next clue: " + location.description}
                 </Linkify>
               </span>
             )}

@@ -58,6 +58,8 @@ model Location {
   description            String
   sponsor                String
   imageUrl               String
+  alternateText          String?
+  infoText               String?
   displayEmailWalletLink Boolean               @default(false)
   createdAt              DateTime              @default(now())
   signaturePrivateKey    LocationKey?          @relation
@@ -112,6 +114,7 @@ model Quest {
   summonId             String?               @unique
   buidlReward          Int
   itemId               Int?                  @unique
+  completionMessage    String?
   createdAt            DateTime              @default(now())
   userRequirements     UserRequirement[]
   locationRequirements LocationRequirement[]

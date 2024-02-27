@@ -15,6 +15,7 @@ import { LocationDetailPlaceholder } from "@/components/placeholders/LocationDet
 import { getNonceFromCounterMessage } from "@/lib/client/libhalo";
 import { LocationTapModal } from "@/components/modals/LocationTapModal";
 import Linkify from "react-linkify";
+import { Button } from "@/components/Button";
 
 const Label = classed.span("text-xs text-gray-10 font-light");
 const Description = classed.span("text-gray-12 text-sm font-light");
@@ -26,6 +27,11 @@ const LocationDetails = () => {
   const [openTapModal, setOpenTapModal] = useState<boolean>();
   const [location, setLocation] = useState<LocationWithQuests>();
   const [signature, setSignature] = useState<LocationSignature>();
+  const [showHint, setShowHint] = useState<boolean>(false);
+
+  const handleShowHint = () => {
+    setShowHint(true);
+  };
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -91,7 +97,7 @@ const LocationDetails = () => {
               />
               <div className="flex flex-col gap-4 jus">
                 <div className="flex flex-col">
-                  <Label>Description</Label>
+                  <Label>This Location</Label>
                   <Description>
                     <Linkify
                       componentDecorator={(
@@ -109,10 +115,64 @@ const LocationDetails = () => {
                         </a>
                       )}
                     >
-                      {location.description}
+                      {location.infoText}
                     </Linkify>
                   </Description>
                 </div>
+                {location.description && (
+                  <div className="flex flex-col">
+                    <Label>Your Next Clue</Label>
+                    <Description>
+                      <Linkify
+                        componentDecorator={(
+                          decoratedHref,
+                          decoratedText,
+                          key
+                        ) => (
+                          <a
+                            target="_blank"
+                            href={decoratedHref}
+                            key={key}
+                            style={{ textDecoration: "underline" }}
+                          >
+                            {decoratedText}
+                          </a>
+                        )}
+                      >
+                        {location.description}
+                      </Linkify>
+                    </Description>
+                  </div>
+                )}
+                {location.alternateText ? (
+                  showHint ? (
+                    <div className="flex flex-col">
+                      <Label>Hint (Booooooo)</Label>
+                      <Description>
+                        <Linkify
+                          componentDecorator={(
+                            decoratedHref,
+                            decoratedText,
+                            key
+                          ) => (
+                            <a
+                              target="_blank"
+                              href={decoratedHref}
+                              key={key}
+                              style={{ textDecoration: "underline" }}
+                            >
+                              {decoratedText}
+                            </a>
+                          )}
+                        >
+                          {location.alternateText}
+                        </Linkify>
+                      </Description>
+                    </div>
+                  ) : (
+                    <Button onClick={handleShowHint}>Stuck?</Button>
+                  )
+                ) : null}
                 {signature !== undefined && (
                   <div className="flex flex-col">
                     <Label>Visited On</Label>

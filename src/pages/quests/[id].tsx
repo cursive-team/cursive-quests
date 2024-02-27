@@ -70,7 +70,7 @@ const QuestDetail = ({ quest, loading = false }: QuestDetailProps) => {
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
         <div className="flex gap-3 items-center">
-          <div className="h-10 w-10 bg-slate-200 rounded-full"></div>
+          {/* <div className="h-10 w-10 bg-slate-200 rounded-full"></div> */}
           <span className="text-xl font-light leading-6">{title}</span>
         </div>
         <button
@@ -348,6 +348,10 @@ export default function QuestById() {
                           questRequirementType={QuestRequirementType.LOCATION}
                           locations={locations}
                           locationPubKeysCollected={locationPublicKeys}
+                          clickable={
+                            numLocationRequirementSignatures[index] ===
+                            numSigsRequired
+                          }
                         />
                       )
                     )}

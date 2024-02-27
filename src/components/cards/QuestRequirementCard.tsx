@@ -20,6 +20,7 @@ interface QuestRequirementCardProps {
   userPubKeysCollected?: string[];
   locationPubKeysCollected?: string[];
   showProgress?: boolean;
+  clickable?: boolean;
 }
 
 const QuestRequirementCard = ({
@@ -32,6 +33,7 @@ const QuestRequirementCard = ({
   userPubKeysCollected,
   locationPubKeysCollected,
   showProgress = false,
+  clickable = true,
 }: QuestRequirementCardProps) => {
   const [showQuestRequirement, setShowQuestRequirement] = useState(false);
 
@@ -60,7 +62,7 @@ const QuestRequirementCard = ({
         setIsOpen={setShowQuestRequirement}
       />
       <Card.Base
-        onClick={onShowQuestRequirement}
+        onClick={clickable ? onShowQuestRequirement : undefined}
         className="text-center flex justify-center py-4"
       >
         <div className="flex flex-col gap-2 items-center">
@@ -84,7 +86,11 @@ const QuestRequirementCard = ({
         {completed && (
           <Icons.checkedCircle className="absolute right-[6px] top-[6px]" />
         )}
-        <Icons.arrowRight className={cn("absolute right-[6px] bottom-[6px]")} />
+        {clickable && (
+          <Icons.arrowRight
+            className={cn("absolute right-[6px] bottom-[6px]")}
+          />
+        )}
         {showProgress && <Card.Progress />}
       </Card.Base>
     </>
