@@ -104,12 +104,15 @@ const AppHeaderContent = ({
               </Description>
               <Subtitle>Who built this?</Subtitle>
               <Description>
-                This app was built by the Cursive team. Cursive is a
-                human-centered cryptography lab building applications of digital
-                signatures and advanced cryptography. We are interested in
-                collaborating with other teams and individuals who want to build
-                cryptography centered experiences. If you are interested, please
-                reach out from our website!
+                This app was built by the{" "}
+                <u>
+                  <a href="cursive.team">Cursive team</a>
+                </u>
+                . Cursive is a human-centered cryptography lab building
+                applications of digital signatures and advanced cryptography. We
+                are interested in collaborating with other teams and individuals
+                who want to build cryptography centered experiences. If you are
+                interested, please reach out from our website!
               </Description>
             </div>
           </ContentWrapper>
