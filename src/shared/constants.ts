@@ -20,11 +20,11 @@ export const StoreSortMapping: Record<StoreSortMappingType, string> = {
 
 export const webauthnRegistrationOptions = {
   rpName: "cursive-quests",
-  rpID: "cursive",
+  rpID: window.location.origin,
   userID: "user",
   userName: "username",
 };
 
 export const webauthnAuthenticationOptions = {
-  rpID: "cursive",
+  rpID: window.location.origin,
 };
