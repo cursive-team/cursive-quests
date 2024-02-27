@@ -85,7 +85,6 @@ export default function Login() {
     }
 
     const username = sha256(id);
-    console.log("a", username, id);
     await login(username, id);
   };
 
@@ -104,7 +103,6 @@ export default function Login() {
 
   const login = async (username: string, password: string) => {
     setLoading(true);
-    console.log("b");
     const response = await fetch("/api/login", {
       method: "POST",
       headers: {
@@ -113,7 +111,6 @@ export default function Login() {
       body: JSON.stringify({ username }),
     });
 
-    console.log("c");
     if (!response.ok) {
       console.error("Error logging in");
       toast.error("Error logging in. Please try again.");
@@ -121,9 +118,7 @@ export default function Login() {
       return;
     }
 
-    console.log("d");
     const { authToken, backup, password: passwordData } = await response.json();
-    console.log("d.5", authToken, authToken.value, authToken.expiresAt);
     if (!authToken) {
       console.error("No auth token found");
       toast.error("Error logging in. Please try again.");
@@ -131,7 +126,6 @@ export default function Login() {
       return;
     }
 
-    console.log("e");
     const { salt, hash } = passwordData;
     const derivedPasswordHash = await hashPassword(password, salt);
     if (derivedPasswordHash !== hash) {
@@ -140,7 +134,6 @@ export default function Login() {
       return;
     }
 
-    console.log("f");
     const { encryptedData, authenticationTag, iv } = backup;
     const decryptedBackupData = decryptBackupString(
       encryptedData,
@@ -150,27 +143,21 @@ export default function Login() {
       password
     );
 
-    console.log("g", authToken, decryptedBackupData);
     // Populate localStorage with auth and backup data to load messages
     saveAuthToken(authToken);
-    console.log("g.5");
     loadBackup(decryptedBackupData);
-    console.log("h", authToken, decryptedBackupData);
 
     try {
       await loadMessages({ forceRefresh: true });
-      console.log("i");
     } catch (error) {
       deleteAccountFromLocalStorage();
       toast.error("Error logging in. Please try again.");
       setLoading(false);
       return;
     }
-    console.log("j");
 
     setLoading(false);
     router.push("/");
-    console.log("k");
   };
 
   if (displayState === DisplayState.DISPLAY) {
