@@ -22,7 +22,7 @@ export default function useSettings() {
 
   useEffect(() => {
     setPageWidth(window?.screen.width);
-    setPageHeight(window?.screen.height);
+    setPageHeight(window?.innerHeight);
   }, []);
 
   return { pageWidth, pageHeight, isIncognito };
