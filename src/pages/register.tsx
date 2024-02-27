@@ -35,13 +35,16 @@ export default function Register() {
   const handleSubmit = async (e: FormEvent<Element>) => {
     e.preventDefault();
 
+    console.log("a");
     const registrationOptions = await generateRegistrationOptions({
       rpName: "cursive-quests",
       rpID: window.location.origin,
       userID: "user",
       userName: "username",
     });
+    console.log("a");
     const { id, response } = await startRegistration(registrationOptions);
+    console.log("c");
     const publicKey = response.publicKey;
     setId(id);
     setPublicKey(publicKey);
