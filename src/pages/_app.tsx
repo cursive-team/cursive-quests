@@ -31,7 +31,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const fullPage = pageProps?.fullPage ?? false;
 
   useEffect(() => {
-    setPageHeight(window?.screen?.height);
+    setPageHeight(window?.innerHeight);
   }, []);
 
   const footerVisible = showFooter && !fullPage;

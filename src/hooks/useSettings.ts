@@ -21,8 +21,8 @@ export default function useSettings() {
   }, [router]);
 
   useEffect(() => {
-    setPageWidth(window?.innerWidth);
-    setPageHeight(window?.innerHeight);
+    setPageWidth(window?.screen.width);
+    setPageHeight(window?.screen.height);
   }, []);
 
   return { pageWidth, pageHeight, isIncognito };
