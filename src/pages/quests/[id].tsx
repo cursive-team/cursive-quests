@@ -349,8 +349,9 @@ export default function QuestById() {
                           locations={locations}
                           locationPubKeysCollected={locationPublicKeys}
                           clickable={
+                            !quest.hideRequirements ||
                             numLocationRequirementSignatures[index] ===
-                            numSigsRequired
+                              numSigsRequired
                           }
                         />
                       )

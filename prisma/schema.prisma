@@ -115,6 +115,7 @@ model Quest {
   buidlReward          Int
   itemId               Int?                  @unique
   completionMessage    String?
+  hideRequirements     Boolean               @default(false)
   createdAt            DateTime              @default(now())
   userRequirements     UserRequirement[]
   locationRequirements LocationRequirement[]
