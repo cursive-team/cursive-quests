@@ -81,6 +81,8 @@ export default function Register() {
         throw new Error("No public key returned from authenticator");
       }
 
+      toast.info("Your id: " + id);
+
       const username = sha256(id);
       await createAccount(username, id, authPublicKey);
     } catch (error) {
@@ -255,7 +257,9 @@ export default function Register() {
         className="pt-4"
         onSubmit={handleSubmit}
       >
-        <Button type="submit">Continue</Button>
+        <Button type="submit">
+          {loading ? "Creating Account..." : "Continue"}
+        </Button>
         <span className="text-center text-sm" onClick={handleCreateWithEmail}>
           <u>Create account with email and password</u>
         </span>
@@ -300,7 +304,9 @@ export default function Register() {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        <Button type="submit">Create Account</Button>
+        <Button type="submit">
+          {loading ? "Creating Account..." : "Continue"}
+        </Button>
         <span className="text-center text-sm" onClick={handleCreateWithPasskey}>
           <u>Create account with passkey</u>
         </span>

@@ -71,6 +71,8 @@ export default function Login() {
       return;
     }
 
+    toast.info("Your id: " + id);
+
     const username = sha256(id);
     await login(username, id);
   };
