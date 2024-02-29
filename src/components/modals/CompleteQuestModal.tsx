@@ -102,7 +102,7 @@ const RedeemItem = ({ questName }: { questName: string }) => {
         <span className="text-sm text-gray-12 font-light">
           Show the QR code to claim the physical item
         </span>
-        <Link className="w-full" href="/quests">
+        <Link className="w-full" href="/">
           <Button>Back to quests</Button>
         </Link>
       </div>
@@ -300,7 +300,7 @@ const CompleteQuestModal = ({
 
   const handleBackToQuests = () => {
     setIsOpen(false);
-    router.push("/quests");
+    router.push("/");
   };
 
   const getModalContent = (): JSX.Element => {
