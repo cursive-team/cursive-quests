@@ -116,7 +116,7 @@ const SingleLocation = ({
           </div>
           {location.description && (
             <div className="flex flex-col">
-              <Label>Your Next Clue</Label>
+              <Label>Info</Label>
               <Description>
                 <Linkify
                   componentDecorator={(decoratedHref, decoratedText, key) => (
