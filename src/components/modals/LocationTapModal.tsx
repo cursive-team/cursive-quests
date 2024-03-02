@@ -136,7 +136,7 @@ const LocationTapModal = ({
                     </a>
                   )}
                 >
-                  {"Your next clue: " + location.description}
+                  {"Info: " + location.description}
                 </Linkify>
               </span>
             )}
